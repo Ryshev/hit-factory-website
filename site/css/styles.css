@@ -273,7 +273,7 @@ img {
   font-weight: 300;
   letter-spacing: 8px;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 16px;
 }
 
