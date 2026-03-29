@@ -5,8 +5,9 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^api/(.*)$ api.php [QSA,L]
 
-# Block direct access to data directory
+# Block direct access to data directory and config
 RewriteRule ^data/ - [F,L]
+RewriteRule ^config\.php$ - [F,L]
 
 # Security headers
 Header set X-Robots-Tag "noindex, nofollow"

@@ -1,5 +1,6 @@
 RewriteEngine On
 ErrorDocument 404 /404.html
+Options -Indexes
 
 # Force HTTPS
 RewriteCond %{HTTPS} off
