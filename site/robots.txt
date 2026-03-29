@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /hf-manage/
 Disallow: /admin/
 
 Sitemap: https://hitfactory.band/sitemap.xml

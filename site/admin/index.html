@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title>Hit Factory — Admin Panel</title>
   <style>
     :root {
@@ -132,8 +133,10 @@
   <header class="header">
     <h1>HIT FACTORY — Admin</h1>
     <div class="actions">
+      <span id="userInfo" style="color:var(--muted);font-size:12px;margin-right:8px"></span>
       <a href="/" class="btn btn-outline" target="_blank">View Site</a>
       <button class="btn btn-primary" id="saveBtn">Save All</button>
+      <button class="btn btn-outline" id="logoutBtn" style="color:var(--danger)">Logout</button>
     </div>
   </header>
 
@@ -150,6 +153,7 @@
       <div class="sidebar-label">Site</div>
       <button class="sidebar-item" data-page="gallery">Gallery</button>
       <button class="sidebar-item" data-page="settings">Settings</button>
+      <button class="sidebar-item" data-page="admins" id="adminsNav">Admins</button>
     </nav>
 
     <main class="content" id="contentArea"></main>
@@ -522,11 +526,123 @@
     function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function escAttr(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
+    // ===================== ADMINS PAGE =====================
+    let currentUser = null;
+
+    async function loadCurrentUser() {
+      try {
+        const res = await fetch(ADMIN_BASE + '/api/me');
+        if (res.status === 401) { window.location.href = ADMIN_BASE; return; }
+        currentUser = await res.json();
+        document.getElementById('userInfo').textContent = currentUser.email;
+        // Show/hide admins nav based on role
+        const adminsNav = document.getElementById('adminsNav');
+        if (adminsNav && currentUser.role !== 'superadmin') adminsNav.style.display = 'none';
+      } catch (e) { window.location.href = ADMIN_BASE; }
+    }
+
+    function renderAdminsPage() {
+      const area = document.getElementById('contentArea');
+      area.innerHTML = `
+        <div class="page-title">Admin Users</div>
+        <div style="margin-bottom:20px">
+          <h3 style="font-size:14px;color:var(--muted);margin-bottom:12px">Add New Admin</h3>
+          <div class="field-row">
+            <div class="field"><label>Email</label><input type="email" id="newAdminEmail"></div>
+            <div class="field"><label>Password (min 8 chars)</label><input type="text" id="newAdminPass"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addAdmin()">Add Admin</button>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:20px">
+          <h3 style="font-size:14px;color:var(--muted);margin-bottom:12px">Current Admins</h3>
+          <div id="adminsList"></div>
+        </div>
+        <div style="border-top:1px solid var(--border);margin-top:24px;padding-top:20px">
+          <h3 style="font-size:14px;color:var(--muted);margin-bottom:12px">Change My Password</h3>
+          <div class="field"><label>Current Password</label><input type="password" id="curPass"></div>
+          <div class="field"><label>New Password (min 8 chars)</label><input type="password" id="newPass"></div>
+          <button class="btn btn-primary btn-sm" onclick="changePassword()">Update Password</button>
+        </div>
+      `;
+      loadAdminsList();
+    }
+
+    async function loadAdminsList() {
+      const res = await fetch(ADMIN_BASE + '/api/admins');
+      if (!res.ok) return;
+      const admins = await res.json();
+      const list = document.getElementById('adminsList');
+      list.innerHTML = admins.map(a => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--surface2);border-radius:8px;margin-bottom:6px">
+          <div>
+            <span style="font-weight:500">${esc(a.email)}</span>
+            <span style="color:var(--muted);font-size:12px;margin-left:8px">${a.role}</span>
+          </div>
+          ${a.id !== currentUser?.id ? `<button class="btn btn-sm" style="background:var(--danger);color:white" onclick="removeAdmin('${a.id}')">Remove</button>` : '<span style="color:var(--muted);font-size:12px">you</span>'}
+        </div>
+      `).join('');
+    }
+
+    async function addAdmin() {
+      const email = document.getElementById('newAdminEmail').value;
+      const password = document.getElementById('newAdminPass').value;
+      const res = await fetch(ADMIN_BASE + '/api/admins', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success) { showToast('Admin added'); loadAdminsList(); }
+      else showToast(data.error || 'Error');
+    }
+
+    async function removeAdmin(id) {
+      if (!confirm('Remove this admin?')) return;
+      const res = await fetch(ADMIN_BASE + '/api/admins/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) { showToast('Admin removed'); loadAdminsList(); }
+      else showToast(data.error || 'Error');
+    }
+
+    async function changePassword() {
+      const res = await fetch(ADMIN_BASE + '/api/change-password', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          currentPassword: document.getElementById('curPass').value,
+          newPassword: document.getElementById('newPass').value
+        })
+      });
+      const data = await res.json();
+      showToast(data.success ? 'Password updated' : (data.error || 'Error'));
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch(ADMIN_BASE + '/api/logout', { method: 'POST' });
+      window.location.href = ADMIN_BASE;
+    });
+
+    // Update render to include admins page
+    const origRender = render;
+    render = function() {
+      if (currentPage === 'admins') renderAdminsPage();
+      else origRender();
+    };
+
     // Save button
     document.getElementById('saveBtn').addEventListener('click', saveAll);
 
-    // Load & render
-    loadData();
+    // Auth check on 401
+    const origFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const res = await origFetch(...args);
+      if (res.status === 401 && args[0]?.includes?.('/api/')) {
+        window.location.href = ADMIN_BASE;
+      }
+      return res;
+    };
+
+    // Load user info, then data
+    loadCurrentUser().then(() => loadData());
   </script>
 </body>
 </html>

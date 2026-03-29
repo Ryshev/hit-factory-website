@@ -16,6 +16,9 @@ convert-images.js
 convert-heic.js
 optimize-images.js
 
+# Environment / secrets
+.env
+
 # OS files
 .DS_Store
 Thumbs.db
