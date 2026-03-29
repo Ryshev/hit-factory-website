@@ -97,6 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
           if (t['page.title']) document.title = t['page.title'];
         }
       }
+
+      // Inject custom head/footer code
+      if (data.customHeadCode) {
+        const headEl = document.getElementById('custom-head-code');
+        if (headEl) { headEl.outerHTML = data.customHeadCode; }
+      }
+      if (data.customFooterCode) {
+        const footEl = document.getElementById('custom-footer-code');
+        if (footEl) { footEl.outerHTML = data.customFooterCode; }
+      }
     } catch (e) { /* Use static HTML defaults */ }
   }
 

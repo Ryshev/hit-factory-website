@@ -356,6 +356,7 @@
           <button class="tab active" data-tab="contact">Contact</button>
           <button class="tab" data-tab="video">Video</button>
           <button class="tab" data-tab="stats">Statistics</button>
+          <button class="tab" data-tab="code">Code Injection</button>
         </div>
         <div class="tab-panel active" id="tabpanel-contact">
           <div class="field-row">
@@ -381,6 +382,18 @@
           <div class="field-row">
             <div class="field"><label>Events</label><input type="text" id="stats-events" value="${escAttr(st.events||'')}"></div>
             <div class="field"><label>Years</label><input type="text" id="stats-years" value="${escAttr(st.years||'')}"></div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tabpanel-code">
+          <div class="field">
+            <label>Custom Head Code (meta tags, analytics, verification)</label>
+            <textarea id="customHeadCode" rows="8" style="font-family:monospace;font-size:12px">${esc(siteData.customHeadCode||'')}</textarea>
+            <div class="field-hint">Injected into &lt;head&gt; on all pages. Use for Google verification, analytics, etc.</div>
+          </div>
+          <div class="field">
+            <label>Custom Footer Code (scripts, tracking pixels)</label>
+            <textarea id="customFooterCode" rows="8" style="font-family:monospace;font-size:12px">${esc(siteData.customFooterCode||'')}</textarea>
+            <div class="field-hint">Injected before &lt;/body&gt; on all pages.</div>
           </div>
         </div>
       `;
@@ -475,6 +488,11 @@
         const el = document.getElementById('stats-' + k);
         if (el) { if (!siteData.stats) siteData.stats = {}; siteData.stats[k] = el.value; }
       });
+      // Custom code injection
+      const headCode = document.getElementById('customHeadCode');
+      if (headCode) siteData.customHeadCode = headCode.value;
+      const footerCode = document.getElementById('customFooterCode');
+      if (footerCode) siteData.customFooterCode = footerCode.value;
     }
 
     // ===================== DRAG & DROP GALLERY =====================

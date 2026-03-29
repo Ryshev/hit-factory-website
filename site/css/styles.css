@@ -231,8 +231,8 @@ img {
     linear-gradient(180deg,
       rgba(10, 10, 10, 0.4) 0%,
       rgba(10, 10, 10, 0.2) 40%,
-      rgba(10, 10, 10, 0.5) 65%,
-      #0a0a0a 100%
+      rgba(17, 17, 17, 0.7) 70%,
+      var(--color-surface) 100%
     ),
     linear-gradient(90deg,
       rgba(226, 58, 110, 0.1) 0%,
@@ -268,7 +268,7 @@ img {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradientShift 4s ease-in-out infinite;
+  animation: gradientShift 5s ease-in-out infinite;
 }
 
 @keyframes gradientShift {
