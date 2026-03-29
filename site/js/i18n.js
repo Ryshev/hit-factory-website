@@ -279,6 +279,9 @@ function detectLanguage() {
 document.addEventListener('DOMContentLoaded', () => {
   const lang = document.documentElement.lang || 'en';
 
+  // Set cookie so .htaccess won't auto-redirect on next visit
+  document.cookie = 'hf-locale=' + lang + ';path=/;max-age=' + (365*24*60*60) + ';SameSite=Lax';
+
   // Set font class for non-Latin scripts
   document.body.classList.remove('font-georgian', 'font-armenian');
   if (lang === 'ka') document.body.classList.add('font-georgian');

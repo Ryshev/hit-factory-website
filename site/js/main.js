@@ -66,31 +66,52 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- Load dynamic content from admin ---- */
   const galleryGrid = document.querySelector('.gallery-grid');
   const GRID_COLS = 6;
-  // Row patterns that sum to 6, for visual variety
+  // Row patterns that sum to 6
   const ROW_PATTERNS = [[3,3],[2,2,2],[2,4],[4,2],[3,3],[2,2,2]];
 
   function layoutGallery(container) {
     const items = Array.from(container.querySelectorAll('.gallery-item'));
-    if (!items.length) return;
-    let i = 0;
+    const count = items.length;
+    if (!count) return;
+
+    // Plan rows so last row has 2 or 3 items
+    // Each pattern uses 2 or 3 items per row
+    const plan = [];
+    let placed = 0;
     let patIdx = 0;
-    while (i < items.length) {
-      const remaining = items.length - i;
-      let row;
-      if (remaining <= GRID_COLS) {
-        // Last row — distribute evenly to fill all 6 columns
-        row = [];
-        const base = Math.floor(GRID_COLS / remaining);
-        let extra = GRID_COLS % remaining;
-        for (let r = 0; r < remaining; r++) {
-          row.push(base + (r < extra ? 1 : 0));
-        }
+
+    while (placed < count) {
+      const remaining = count - placed;
+
+      if (remaining === 2) {
+        plan.push([3, 3]); // 2 items, each span 3
+        placed += 2;
+      } else if (remaining === 3) {
+        plan.push([2, 2, 2]); // 3 items, each span 2
+        placed += 3;
+      } else if (remaining === 4) {
+        plan.push([3, 3]); // 2 items
+        placed += 2; // leaves 2 for last row
+      } else if (remaining === 5) {
+        plan.push([2, 2, 2]); // 3 items
+        placed += 3; // leaves 2 for last row
       } else {
-        row = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
+        // 6+ remaining — use pattern
+        const pat = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
+        plan.push(pat);
+        placed += pat.length;
         patIdx++;
       }
-      for (let r = 0; r < row.length && i < items.length; r++, i++) {
-        items[i].style.gridColumn = 'span ' + row[r];
+    }
+
+    // Apply spans
+    let idx = 0;
+    for (const row of plan) {
+      for (const span of row) {
+        if (idx < count) {
+          items[idx].style.gridColumn = 'span ' + span;
+          idx++;
+        }
       }
     }
   }
