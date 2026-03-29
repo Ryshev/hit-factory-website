@@ -391,6 +391,8 @@
 
   <script>
     let siteData = {};
+    // Derive API base from current URL path (admin slug)
+    const ADMIN_BASE = window.location.pathname.replace(/\/+$/, '');
     const LANGS = ['en', 'ru', 'uk', 'ka', 'hy', 'kk'];
     const LANG_NAMES = { en: 'English', ru: 'Russian', uk: 'Ukrainian', ka: 'Georgian', hy: 'Armenian', kk: 'Kazakh' };
 
@@ -408,7 +410,7 @@
     // Load data from server
     async function loadData() {
       try {
-        const res = await fetch('/api/data');
+        const res = await fetch(ADMIN_BASE + '/api/data');
         siteData = await res.json();
       } catch (e) {
         console.error('Failed to load data:', e);
@@ -496,7 +498,7 @@
     // Gallery management
     async function loadGallery() {
       try {
-        const res = await fetch('/api/images');
+        const res = await fetch(ADMIN_BASE + '/api/images');
         const allImages = await res.json();
         const grid = document.getElementById('galleryGrid');
         const selectedImages = siteData.gallery || [];
@@ -567,7 +569,7 @@
     async function saveAll() {
       const data = collectData();
       try {
-        const res = await fetch('/api/data', {
+        const res = await fetch(ADMIN_BASE + '/api/data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
