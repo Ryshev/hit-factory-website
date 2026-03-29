@@ -296,21 +296,71 @@ ExpiresByType image/avif "access plus 1 year"
 AddOutputFilterByType DEFLATE text/html text/css application/javascript
 ```
 
-## 8. Security Checklist
+## 8. Schema.org Structured Data
+
+Three JSON-LD schemas per page:
+
+```json
+[{
+  "@type": "MusicGroup",     // Band: genres, members, languages, booking offer
+  "areaServed": ["Georgia", "Armenia", "Kazakhstan", "Europe", "International"]
+},
+{
+  "@type": "EntertainmentBusiness",  // Local search: address, priceRange
+  "address": { "addressCountry": "GE", "addressLocality": "Tbilisi" }
+},
+{
+  "@type": "WebSite",        // Site: languages, booking action
+  "inLanguage": ["en", "ru", "uk", "ka", "hy", "kk"]
+}]
+```
+
+## 9. Cache Busting
+
+Build script replaces `?v=` on CSS/JS files:
+```javascript
+html = html.replace(/styles\.css(\?v=[^"]*)?/g, `styles.css?v=${VERSION}`);
+// VERSION = YYYYMMDD-HHMM from build timestamp
+```
+
+Uses replace (not append) — prevents `?v=1?v=2?v=3` duplication.
+
+## 10. Language Cookie
+
+When user visits any page, JS sets `hf-locale` cookie:
+```javascript
+document.cookie = 'hf-locale=' + lang + ';path=/;max-age=31536000;SameSite=Lax';
+```
+
+`.htaccess` checks this cookie before auto-redirecting:
+```apache
+RewriteCond %{HTTP_COOKIE} !hf-locale=
+RewriteRule ^$ /ru/ [R=302,L]
+```
+
+This prevents redirect loops when a Russian-speaking user clicks EN.
+
+## 11. Security Checklist
 
 - [x] HMAC-signed httpOnly cookies (not localStorage)
+- [x] Cryptographically random AUTH_SECRET (48 bytes)
 - [x] bcrypt passwords (cost 12)
-- [x] SameSite=Strict cookies
-- [x] Rate limiting on auth endpoints
+- [x] SameSite=Strict cookies, 2h expiry
+- [x] Rate limiting on auth + data save endpoints
 - [x] Honeypot + CAPTCHA on login
+- [x] MIME type validation on file uploads (finfo)
+- [x] Gallery img src regex whitelist
+- [x] X-Frame-Options: DENY, X-Content-Type-Options: nosniff
+- [x] No-cache headers on admin pages
 - [x] Data directory blocked by .htaccess
 - [x] noindex/nofollow on admin pages
 - [x] Path traversal protection (basename)
 - [x] Cannot delete last superadmin
+- [x] Initial password auto-deleted after first login
 - [x] Old slug 301 redirects (SEO preservation)
 - [x] Google verification in static HTML (not JS)
 
-## 9. Reuse Checklist
+## 12. Reuse Checklist
 
 1. Fork/copy this repository
 2. Replace images in `site/images/`

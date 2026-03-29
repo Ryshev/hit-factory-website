@@ -327,6 +327,27 @@ Let's Encrypt via acme.sh:
 - Instagram: @hitfactory_band
 - Contact grid: 2×2 layout (phones top row, email + Instagram bottom row)
 
+## Schema.org Structured Data
+
+Three JSON-LD schemas on every page:
+
+| Type | Purpose |
+|------|---------|
+| **MusicGroup** | Band info: genres (Pop, Rock, Dance, Cover), 5 members, languages, area served, booking offer |
+| **EntertainmentBusiness** | Local business: Tbilisi address, price range, Instagram, contact |
+| **WebSite** | Site meta: 6 languages, CommunicateAction for booking |
+
+Area served: Georgia, Armenia, Kazakhstan, Europe, International.
+
+## Cache Busting
+
+CSS and JS files get `?v=YYYYMMDD-HHMM` suffix on every build:
+```
+styles.css?v=20260329-2117
+main.js?v=20260329-2117
+```
+Generated automatically by `build-locales.js`. Forces cache clear on all devices after deploy.
+
 ## Performance
 
 - AVIF images (5-10x smaller than JPEG)
@@ -336,6 +357,7 @@ Let's Encrypt via acme.sh:
 - Gzip compression + cache headers via .htaccess
 - No JavaScript frameworks (~6KB total JS)
 - Fluid typography with `clamp()` — no layout shifts on resize
+- CSS/JS cache busting via versioned query strings
 
 ## Testing Checklist
 
@@ -374,6 +396,8 @@ No automated tests (project is a static site + simple PHP API). Use this manual 
 - [ ] sitemap.xml lists all locale URLs
 - [ ] Google verification meta tag in static HTML
 - [ ] Old slugs (/uk/, /ka/, /hy/, /kk/) 301-redirect to new ones
+- [ ] Schema.org JSON-LD: MusicGroup + EntertainmentBusiness + WebSite
+- [ ] CSS/JS have single `?v=` version (no duplication)
 
 ### Security
 - [ ] Admin pages return `X-Frame-Options: DENY`
