@@ -162,7 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const footEl = document.getElementById('custom-footer-code');
         if (footEl) { footEl.outerHTML = data.customFooterCode; }
       }
-    } catch (e) { /* Use static HTML defaults */ }
+    } catch (e) {
+      // Fallback: layout static gallery items
+      if (galleryGrid) layoutGallery(galleryGrid);
+    }
   }
 
   loadDynamicContent();
