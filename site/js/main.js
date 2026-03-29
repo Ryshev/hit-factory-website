@@ -159,8 +159,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const key = el.getAttribute('data-i18n');
             if (t[key]) el.textContent = t[key];
           });
-          // Update page title
-          if (t['page.title']) document.title = t['page.title'];
+          // Update page title and OG meta tags
+          if (t['page.title']) {
+            document.title = t['page.title'];
+            const ogTitle = document.querySelector('meta[property="og:title"]');
+            if (ogTitle) ogTitle.setAttribute('content', t['page.title']);
+            const twTitle = document.querySelector('meta[name="twitter:title"]');
+            if (twTitle) twTitle.setAttribute('content', t['page.title']);
+          }
+          if (t['hero.description']) {
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) metaDesc.setAttribute('content', t['hero.description']);
+            const ogDesc = document.querySelector('meta[property="og:description"]');
+            if (ogDesc) ogDesc.setAttribute('content', t['hero.description']);
+            const twDesc = document.querySelector('meta[name="twitter:description"]');
+            if (twDesc) twDesc.setAttribute('content', t['hero.description']);
+          }
         }
       }
 

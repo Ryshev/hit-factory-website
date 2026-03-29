@@ -179,7 +179,8 @@ PHP writes /data/content.json (public subset: gallery, translations, code)
 User visits site → JS fetches /data/content.json
     ↓
 JS overrides data-i18n elements with admin text
-JS rebuilds gallery from admin photo list
+JS updates <title>, og:title, og:description, meta description dynamically
+JS rebuilds gallery with adaptive layout (6-col varied / 3-col equal / 2-col mobile)
 JS injects custom head/footer code
     ↓
 User sees latest content (no rebuild needed)
@@ -266,21 +267,23 @@ For each language:
 
 ### Varied Layout
 
-6-column CSS grid with JS-assigned spans per item:
+JS auto-detects CSS grid columns via `getComputedStyle` and adapts:
 
+**Desktop (6 columns):** Varied row patterns with equal last row
 ```
-Row patterns (cycle): [3,3] → [2,2,2] → [2,4] → [4,2] → [3,3] → [2,2,2]
-Last row: items distributed evenly to fill all 6 columns
+Body rows: [4,2] → [2,2,2] → [3,3] → [2,4] (cycling, all sum to 6)
+Last row: 2 items (span 3 each) or 3 items (span 2 each)
 ```
 
-Works with any number of photos — no empty space.
+**Tablet/Mobile (≤3 columns):** JS clears all inline spans, CSS manages equal grid
+
+Works with any number of photos — no empty space, no overflow.
 
 ### Responsive
 
-- Desktop: 6-column grid (280px rows)
-- Tablet: 4-column grid (220px rows)
-- Mobile: 2-column grid (180px rows)
-- Small mobile: 1-column grid (240px rows)
+- Desktop (>968px): 6-column grid with JS varied spans (280px rows)
+- Tablet (≤968px): 3-column equal grid (220px rows)
+- Mobile (≤768px): 2-column equal grid (180px rows), last odd photo spans full width
 
 ### Admin Gallery Management
 
