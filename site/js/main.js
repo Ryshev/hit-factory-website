@@ -38,6 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
     link.addEventListener('click', () => navMenu.classList.remove('open'));
   });
 
+  // Close mobile menu on click outside
+  document.addEventListener('click', (e) => {
+    if (navMenu.classList.contains('open') && !navMenu.contains(e.target) && !navToggle.contains(e.target)) {
+      navMenu.classList.remove('open');
+    }
+  });
+
   /* ---- Scroll reveal ---- */
   const revealElements = document.querySelectorAll(
     '.section-header, .about-hero-image, .about-text-block, .about-stats, .member-card, .gallery-item, .video-wrapper, .contact-card, .contact-description'

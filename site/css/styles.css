@@ -789,9 +789,9 @@ img {
 
 .contact-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  max-width: 900px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -935,8 +935,8 @@ img {
   .gallery-item:nth-child(6n+6) { grid-column: span 2; grid-row: span 1; }
 
   .contact-grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 500px;
+    grid-template-columns: 1fr;
+    max-width: 400px;
   }
 }
 
