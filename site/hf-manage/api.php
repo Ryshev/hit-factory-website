@@ -149,7 +149,17 @@ function getDefaultData() {
         ],
         'video' => ['youtubeId' => 'BGo9yW8Uocs', 'posterImage' => 'images/band-full-pink.avif'],
         'stats' => ['musicians' => '5', 'songs' => '200+', 'events' => '100+', 'years' => '5+'],
-        'gallery' => [],
+        'gallery' => [
+            'images/band-full-teal.avif', 'images/duo-guitar-vocal.avif',
+            'images/vocalist-singing.avif', 'images/guitarist-solo.avif',
+            'images/vocalist-closeup.avif', 'images/band-full-led.avif',
+            'images/bassist-solo-blue.avif', 'images/band-full-pink.avif',
+            'images/duo-stage.avif', 'images/drummer-solo.avif',
+            'images/guitarist-acoustic.avif', 'images/band-silhouette.avif',
+            'images/vocalist-blue.avif', 'images/bassist-solo-white.avif',
+            'images/guitarist-action.avif', 'images/vocalist-solo.avif',
+            'images/band-full-blue.avif'
+        ],
         'translations' => []
     ];
 }
