@@ -193,10 +193,10 @@
       'Hero': ['hero.subtitle','hero.description','hero.cta'],
       'About': ['about.tag','about.title','about.heading1','about.text1','about.heading2','about.text2',
         'about.musicians','about.songs','about.events','about.years'],
-      'Navigation': ['nav.home','nav.about','nav.gallery','nav.video','nav.contact'],
       'Gallery & Video': ['gallery.tag','gallery.title','video.tag','video.title','video.subtitle'],
       'Contact': ['contact.tag','contact.title','contact.description','contact.phone','contact.email'],
-      'Footer': ['footer.rights']
+      'Footer': ['footer.rights'],
+      'Navigation': ['nav.home','nav.about','nav.gallery','nav.contact']
     };
 
     let siteData = {};
@@ -326,8 +326,19 @@
           </div>`;
       });
 
+      // Gallery section text fields (editable per current language)
+      const t = siteData.translations[currentLang] || {};
+      const galleryFields = `
+        <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+          <div class="field-row">
+            <div class="field"><label>Section Tag (${LANG_NAMES[currentLang]})</label><input type="text" data-lang="${currentLang}" data-key="gallery.tag" value="${escAttr(t['gallery.tag']||'')}"></div>
+            <div class="field"><label>Section Title (${LANG_NAMES[currentLang]})</label><input type="text" data-lang="${currentLang}" data-key="gallery.title" value="${escAttr(t['gallery.title']||'')}"></div>
+          </div>
+        </div>`;
+
       area.innerHTML = `
         <div class="page-title">Gallery Management</div>
+        ${galleryFields}
         <div class="upload-area" id="uploadArea">
           <p>Drop images here or click to upload</p>
           <input type="file" id="uploadInput" multiple accept=".avif,.jpg,.jpeg,.png,.webp">
