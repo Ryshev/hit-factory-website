@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hit Factory — Admin Panel</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --border: #333;
+      --text: #e5e5e5;
+      --muted: #888;
+      --accent: #e23a6e;
+      --accent2: #6c3ce0;
+      --success: #22c55e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .admin-header .actions { display: flex; gap: 8px; }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent); }
+
+    /* Layout */
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 57px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .sidebar-item {
+      display: block;
+      padding: 10px 20px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: 0.2s;
+    }
+    .sidebar-item:hover { color: var(--text); background: var(--surface2); }
+    .sidebar-item.active {
+      color: var(--accent);
+      background: rgba(226, 58, 110, 0.08);
+      border-right: 2px solid var(--accent);
+    }
+
+    /* Content area */
+    .admin-content {
+      flex: 1;
+      padding: 32px;
+      max-width: 900px;
+    }
+
+    /* Panels */
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .panel h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 24px 0 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 12px;
+    }
+
+    /* Form elements */
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .field input, .field textarea, .field select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: 0.2s;
+    }
+    .field input:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .field textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Tabs for languages */
+    .lang-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: 10px;
+      width: fit-content;
+    }
+    .lang-tab {
+      padding: 6px 16px;
+      border: none;
+      background: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+    .lang-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+    .lang-panel { display: none; }
+    .lang-panel.active { display: block; }
+
+    /* Gallery grid */
+    .gallery-admin {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .gallery-admin-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .gallery-admin-item.selected { border-color: var(--accent); }
+    .gallery-admin-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .gallery-admin-item .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 24px;
+      background: var(--success);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: 0.3s;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header class="admin-header">
+    <h1>HIT FACTORY — Admin Panel</h1>
+    <div class="actions">
+      <a href="/" class="btn btn-secondary" target="_blank">View Site</a>
+      <button class="btn btn-primary" onclick="saveAll()">Save Changes</button>
+    </div>
+  </header>
+
+  <div class="admin-layout">
+    <nav class="sidebar">
+      <button class="sidebar-item active" data-panel="seo">SEO & Open Graph</button>
+      <button class="sidebar-item" data-panel="contact">Contacts</button>
+      <button class="sidebar-item" data-panel="video">Video</button>
+      <button class="sidebar-item" data-panel="stats">Statistics</button>
+      <button class="sidebar-item" data-panel="translations">Translations</button>
+      <button class="sidebar-item" data-panel="gallery">Gallery</button>
+    </nav>
+
+    <main class="admin-content">
+
+      <!-- SEO Panel -->
+      <div class="panel active" id="panel-seo">
+        <h2>SEO & Open Graph</h2>
+        <div class="field">
+          <label>Page Title (title tag)</label>
+          <input type="text" id="seo-title" placeholder="Hit Factory — Professional Cover Band">
+        </div>
+        <div class="field">
+          <label>Meta Description</label>
+          <textarea id="seo-description" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label>Keywords</label>
+          <input type="text" id="seo-keywords" placeholder="cover band, live music, ...">
+        </div>
+        <div class="field">
+          <label>Canonical URL</label>
+          <input type="text" id="seo-canonical" placeholder="https://hitfactory.band/">
+        </div>
+        <h3>Open Graph</h3>
+        <div class="field">
+          <label>OG Image URL</label>
+          <input type="text" id="seo-ogImage" placeholder="https://hitfactory.band/images/og-image.jpg">
+        </div>
+        <p style="color: var(--muted); font-size: 13px; margin-top: 8px;">Recommended OG image size: 1200x630px. This image appears when sharing links on social media.</p>
+      </div>
+
+      <!-- Contact Panel -->
+      <div class="panel" id="panel-contact">
+        <h2>Contact Information</h2>
+        <div class="field-row">
+          <div class="field">
+            <label>Phone (display)</label>
+            <input type="text" id="contact-phone" placeholder="+1 (234) 567-890">
+          </div>
+          <div class="field">
+            <label>Phone (tel: link)</label>
+            <input type="text" id="contact-phoneLink" placeholder="tel:+1234567890">
+          </div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="contact-email" placeholder="info@hitfactory.band">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Instagram Handle</label>
+            <input type="text" id="contact-instagram" placeholder="@hitfactory">
+          </div>
+          <div class="field">
+            <label>Instagram URL</label>
+            <input type="text" id="contact-instagramUrl" placeholder="https://instagram.com/hitfactory">
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Panel -->
+      <div class="panel" id="panel-video">
+        <h2>Promo Video</h2>
+        <div class="field">
+          <label>YouTube Video ID</label>
+          <input type="text" id="video-youtubeId" placeholder="e.g. dQw4w9WgXcQ">
+          <p style="color: var(--muted); font-size: 12px; margin-top: 6px;">
+            Extract from URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong>
+          </p>
+        </div>
+        <div class="field">
+          <label>Poster Image (thumbnail before play)</label>
+          <input type="text" id="video-posterImage" placeholder="images/band-full-pink.avif">
+        </div>
+      </div>
+
+      <!-- Stats Panel -->
+      <div class="panel" id="panel-stats">
+        <h2>Statistics</h2>
+        <div class="field-row">
+          <div class="field">
+            <label>Musicians</label>
+            <input type="text" id="stats-musicians" placeholder="5">
+          </div>
+          <div class="field">
+            <label>Songs in Repertoire</label>
+            <input type="text" id="stats-songs" placeholder="200+">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Events Performed</label>
+            <input type="text" id="stats-events" placeholder="100+">
+          </div>
+          <div class="field">
+            <label>Years Together</label>
+            <input type="text" id="stats-years" placeholder="5+">
+          </div>
+        </div>
+      </div>
+
+      <!-- Translations Panel -->
+      <div class="panel" id="panel-translations">
+        <h2>Translations</h2>
+        <div class="lang-tabs" id="langTabs"></div>
+        <div id="langPanels"></div>
+      </div>
+
+      <!-- Gallery Panel -->
+      <div class="panel" id="panel-gallery">
+        <h2>Gallery Management</h2>
+        <p style="color: var(--muted); margin-bottom: 16px; font-size: 14px;">Click images to add/remove from gallery. Order matters — drag support coming soon.</p>
+        <h3>Available Images</h3>
+        <div class="gallery-admin" id="galleryGrid"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast">Changes saved successfully!</div>
+
+  <script>
+    let siteData = {};
+    const LANGS = ['en', 'ru', 'uk', 'ka', 'hy', 'kk'];
+    const LANG_NAMES = { en: 'English', ru: 'Russian', uk: 'Ukrainian', ka: 'Georgian', hy: 'Armenian', kk: 'Kazakh' };
+
+    // Translation keys grouped for the editor
+    const TRANSLATION_GROUPS = {
+      'Hero Section': ['hero.subtitle', 'hero.description', 'hero.cta'],
+      'About Section': ['about.tag', 'about.title', 'about.quote', 'about.heading1', 'about.text1', 'about.heading2', 'about.text2',
+        'about.musicians', 'about.songs', 'about.events', 'about.years',
+        'about.guitar', 'about.vocals', 'about.bass', 'about.drums', 'about.keys'],
+      'Navigation': ['nav.home', 'nav.about', 'nav.gallery', 'nav.video', 'nav.contact'],
+      'Gallery & Video': ['gallery.tag', 'gallery.title', 'video.tag', 'video.title', 'video.subtitle'],
+      'Contact & Footer': ['contact.tag', 'contact.title', 'contact.description', 'contact.phone', 'contact.email', 'footer.rights']
+    };
+
+    // Load data from server
+    async function loadData() {
+      try {
+        const res = await fetch('/api/data');
+        siteData = await res.json();
+      } catch (e) {
+        console.error('Failed to load data:', e);
+        siteData = {};
+      }
+      populateFields();
+    }
+
+    // Populate form fields
+    function populateFields() {
+      // SEO
+      ['title', 'description', 'keywords', 'canonical', 'ogImage'].forEach(key => {
+        const el = document.getElementById('seo-' + key);
+        if (el && siteData.seo) el.value = siteData.seo[key] || '';
+      });
+
+      // Contact
+      ['phone', 'phoneLink', 'email', 'instagram', 'instagramUrl'].forEach(key => {
+        const el = document.getElementById('contact-' + key);
+        if (el && siteData.contact) el.value = siteData.contact[key] || '';
+      });
+
+      // Video
+      ['youtubeId', 'posterImage'].forEach(key => {
+        const el = document.getElementById('video-' + key);
+        if (el && siteData.video) el.value = siteData.video[key] || '';
+      });
+
+      // Stats
+      ['musicians', 'songs', 'events', 'years'].forEach(key => {
+        const el = document.getElementById('stats-' + key);
+        if (el && siteData.stats) el.value = siteData.stats[key] || '';
+      });
+
+      // Translations
+      buildTranslationEditor();
+
+      // Gallery
+      loadGallery();
+    }
+
+    // Build translation editor tabs
+    function buildTranslationEditor() {
+      const tabsEl = document.getElementById('langTabs');
+      const panelsEl = document.getElementById('langPanels');
+      tabsEl.innerHTML = '';
+      panelsEl.innerHTML = '';
+
+      LANGS.forEach((lang, i) => {
+        const tab = document.createElement('button');
+        tab.className = 'lang-tab' + (i === 0 ? ' active' : '');
+        tab.textContent = LANG_NAMES[lang];
+        tab.dataset.lang = lang;
+        tab.onclick = () => switchLangTab(lang);
+        tabsEl.appendChild(tab);
+
+        const panel = document.createElement('div');
+        panel.className = 'lang-panel' + (i === 0 ? ' active' : '');
+        panel.id = 'lang-' + lang;
+
+        const translations = siteData.translations && siteData.translations[lang] ? siteData.translations[lang] : {};
+
+        for (const [group, keys] of Object.entries(TRANSLATION_GROUPS)) {
+          panel.innerHTML += '<h3>' + group + '</h3>';
+          keys.forEach(key => {
+            const value = translations[key] || '';
+            const isLong = key.includes('text') || key.includes('description');
+            panel.innerHTML += '<div class="field"><label>' + key + '</label>' +
+              (isLong
+                ? '<textarea data-lang="' + lang + '" data-key="' + key + '" rows="3">' + escapeHtml(value) + '</textarea>'
+                : '<input type="text" data-lang="' + lang + '" data-key="' + key + '" value="' + escapeAttr(value) + '">') +
+              '</div>';
+          });
+        }
+
+        panelsEl.appendChild(panel);
+      });
+    }
+
+    function switchLangTab(lang) {
+      document.querySelectorAll('.lang-tab').forEach(t => t.classList.toggle('active', t.dataset.lang === lang));
+      document.querySelectorAll('.lang-panel').forEach(p => p.classList.toggle('active', p.id === 'lang-' + lang));
+    }
+
+    // Gallery management
+    async function loadGallery() {
+      try {
+        const res = await fetch('/api/images');
+        const allImages = await res.json();
+        const grid = document.getElementById('galleryGrid');
+        const selectedImages = siteData.gallery || [];
+
+        grid.innerHTML = allImages.map(img => {
+          const isSelected = selectedImages.includes(img);
+          return '<div class="gallery-admin-item' + (isSelected ? ' selected' : '') + '" data-src="' + img + '" onclick="toggleGalleryImage(this)">' +
+            '<img src="/' + img + '" alt="" loading="lazy">' +
+            '</div>';
+        }).join('');
+      } catch (e) {
+        console.error('Failed to load images:', e);
+      }
+    }
+
+    function toggleGalleryImage(el) {
+      el.classList.toggle('selected');
+    }
+
+    // Collect all data from form
+    function collectData() {
+      const data = {
+        seo: {},
+        contact: {},
+        video: {},
+        stats: {},
+        gallery: [],
+        translations: {}
+      };
+
+      // SEO
+      ['title', 'description', 'keywords', 'canonical', 'ogImage'].forEach(key => {
+        data.seo[key] = document.getElementById('seo-' + key)?.value || '';
+      });
+
+      // Contact
+      ['phone', 'phoneLink', 'email', 'instagram', 'instagramUrl'].forEach(key => {
+        data.contact[key] = document.getElementById('contact-' + key)?.value || '';
+      });
+
+      // Video
+      ['youtubeId', 'posterImage'].forEach(key => {
+        data.video[key] = document.getElementById('video-' + key)?.value || '';
+      });
+
+      // Stats
+      ['musicians', 'songs', 'events', 'years'].forEach(key => {
+        data.stats[key] = document.getElementById('stats-' + key)?.value || '';
+      });
+
+      // Translations
+      LANGS.forEach(lang => {
+        data.translations[lang] = {};
+        document.querySelectorAll('[data-lang="' + lang + '"]').forEach(el => {
+          data.translations[lang][el.dataset.key] = el.value;
+        });
+      });
+
+      // Gallery
+      document.querySelectorAll('.gallery-admin-item.selected').forEach(el => {
+        data.gallery.push(el.dataset.src);
+      });
+
+      return data;
+    }
+
+    // Save to server
+    async function saveAll() {
+      const data = collectData();
+      try {
+        const res = await fetch('/api/data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.success) {
+          showToast('Changes saved successfully!');
+        }
+      } catch (e) {
+        showToast('Error saving: ' + e.message);
+      }
+    }
+
+    // Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Sidebar navigation
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        item.classList.add('active');
+        document.getElementById('panel-' + item.dataset.panel).classList.add('active');
+      });
+    });
+
+    // Utils
+    function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function escapeAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+    // Init
+    loadData();
+  </script>
+</body>
+</html>

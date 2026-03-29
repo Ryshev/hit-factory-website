@@ -4,16 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---- Navbar scroll effect ---- */
   const navbar = document.getElementById('navbar');
-  const onScroll = () => {
+  window.addEventListener('scroll', () => {
     navbar.classList.toggle('scrolled', window.scrollY > 60);
-  };
-  window.addEventListener('scroll', onScroll, { passive: true });
+  }, { passive: true });
 
   /* ---- Active nav link highlight ---- */
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-menu a');
 
-  const highlightNav = () => {
+  window.addEventListener('scroll', () => {
     const scrollY = window.scrollY + 200;
     sections.forEach(section => {
       const top = section.offsetTop;
@@ -25,8 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
-  };
-  window.addEventListener('scroll', highlightNav, { passive: true });
+  }, { passive: true });
 
   /* ---- Mobile menu toggle ---- */
   const navToggle = document.getElementById('navToggle');
@@ -34,19 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   navToggle.addEventListener('click', () => {
     navMenu.classList.toggle('open');
-    navToggle.classList.toggle('active');
   });
 
   navMenu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      navMenu.classList.remove('open');
-      navToggle.classList.remove('active');
-    });
+    link.addEventListener('click', () => navMenu.classList.remove('open'));
   });
 
   /* ---- Scroll reveal ---- */
   const revealElements = document.querySelectorAll(
-    '.section-header, .about-text, .about-image, .gallery-item, .video-wrapper, .contact-card, .contact-description'
+    '.section-header, .about-hero-image, .about-text-block, .about-stats, .member-card, .gallery-item, .video-wrapper, .contact-card, .contact-description'
   );
 
   revealElements.forEach(el => el.classList.add('reveal'));
@@ -106,6 +100,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowLeft') navigateLightbox(-1);
     if (e.key === 'ArrowRight') navigateLightbox(1);
+  });
+
+  /* ---- Lite YouTube embed (lazy load) ---- */
+  document.querySelectorAll('.lite-youtube').forEach(el => {
+    el.addEventListener('click', () => {
+      const videoId = el.dataset.videoid;
+      if (!videoId || videoId === 'YOUR_YOUTUBE_ID') {
+        // No video ID set — do nothing
+        return;
+      }
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0';
+      iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.title = el.dataset.title || 'Video';
+      el.innerHTML = '';
+      el.appendChild(iframe);
+      el.classList.add('playing');
+    });
   });
 
   /* ---- Smooth scroll for anchor links ---- */
