@@ -231,6 +231,37 @@ letter-spacing: clamp(4px, 1.5vw, 12px); /* Adapts with screen */
 padding: 0 clamp(16px, 4vw, 24px);       /* Container padding */
 ```
 
+### Fluid sizing: always use clamp(), never fixed px
+
+**Rule:** All font sizes, spacings, paddings that vary by screen — use `clamp(min, preferred, max)` from the start. Never hardcode `px` values that need media query overrides later.
+
+```css
+/* Good — fluid, no breakpoints needed */
+font-size: clamp(52px, 18vw, 180px);
+letter-spacing: clamp(2px, 1vw, 12px);
+padding: 0 clamp(16px, 4vw, 24px);
+
+/* Bad — requires multiple @media to fix */
+font-size: 180px;
+@media (max-width: 768px) { font-size: 80px; }
+@media (max-width: 480px) { font-size: 48px; }
+```
+
+**Why:** Fixed `px` values create discrete jumps between breakpoints. `clamp()` scales smoothly across all screen sizes. Easier to maintain — one line instead of multiple media queries. Especially important for multilingual sites where text length varies by language.
+
+**Units priority:**
+- `clamp()` with `vw` for fluid scaling (headings, hero text, spacing)
+- `rem` for consistent sizing relative to root font-size (body text, margins, paddings)
+- `px` only for borders, shadows, and tiny fixed values (1px, 2px)
+- Never `px` for font sizes or layout spacing — always `rem` or `clamp()`
+
+**Where to apply:**
+- Hero title, subtitles, section headings
+- Letter-spacing (long text with wide spacing overflows on mobile)
+- Container padding (tighter on mobile, wider on desktop)
+- Nav logo size
+- Any spacing that "breaks" on small screens
+
 ### Multilingual text overflow prevention
 
 ```css
