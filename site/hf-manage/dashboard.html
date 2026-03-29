@@ -277,20 +277,21 @@
     }
 
     function renderSeoFields() {
+      // SEO fields are per-locale — read from current language translations
+      const t = siteData.translations[currentLang] || {};
       const s = siteData.seo || {};
       const ogImg = s.ogImage || '';
       const ogPath = ogImg.replace(/^https?:\/\/[^/]+\//, '');
       return `
-        <h3 style="margin-top:0">Page Meta</h3>
-        <div class="field"><label>Page Title (browser tab)</label><input type="text" id="seo-title" value="${escAttr(s.title||'')}"></div>
-        <div class="field"><label>Meta Description</label><textarea id="seo-description" rows="3">${esc(s.description||'')}</textarea></div>
+        <h3 style="margin-top:0">Page Meta (${LANG_NAMES[currentLang]})</h3>
+        <div class="field-hint" style="margin-bottom:12px">These fields are per-language. The build script uses them for &lt;title&gt;, meta description, OG title/description.</div>
+        <div class="field"><label>Page Title (browser tab + OG title)</label><input type="text" data-lang="${currentLang}" data-key="page.title" value="${escAttr(t['page.title']||'')}"></div>
+        <div class="field"><label>Meta Description (+ OG description)</label><textarea data-lang="${currentLang}" data-key="hero.description" rows="3">${esc(t['hero.description']||'')}</textarea></div>
+        <h3>Global SEO Settings</h3>
         <div class="field"><label>Keywords</label><input type="text" id="seo-keywords" value="${escAttr(s.keywords||'')}"></div>
-        <div class="field"><label>Canonical URL</label><input type="text" id="seo-canonical" value="${escAttr(s.canonical||'')}"></div>
-        <h3>Open Graph (social media sharing)</h3>
-        <div class="field"><label>OG Title</label><input type="text" id="seo-ogTitle" value="${escAttr(s.ogTitle||s.title||'')}"></div>
-        <div class="field"><label>OG Description</label><textarea id="seo-ogDescription" rows="2">${esc(s.ogDescription||s.description||'')}</textarea></div>
+        <div class="field"><label>Canonical URL (base)</label><input type="text" id="seo-canonical" value="${escAttr(s.canonical||'')}"></div>
+        <h3>Open Graph Image (shared across all languages)</h3>
         <div class="field">
-          <label>OG Image (1200×630px)</label>
           <input type="text" id="seo-ogImage" value="${escAttr(ogImg)}" style="margin-bottom:8px">
           <div style="display:flex;gap:12px;align-items:flex-start">
             <div id="ogPreview" style="width:300px;height:158px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--surface2);flex-shrink:0">
@@ -301,7 +302,7 @@
                 <p style="font-size:12px">Drop image or click to upload</p>
                 <input type="file" id="ogUploadInput" accept=".jpg,.jpeg,.png,.webp" style="display:none">
               </div>
-              <div class="field-hint" style="margin-top:6px">Recommended: 1200×630px JPEG.</div>
+              <div class="field-hint" style="margin-top:6px">1200×630px JPEG recommended.</div>
             </div>
           </div>
         </div>
@@ -455,7 +456,7 @@
         siteData.translations[lang][key] = el.value;
       });
       // SEO
-      ['title','description','keywords','canonical','ogImage','ogTitle','ogDescription'].forEach(k => {
+      ['keywords','canonical','ogImage'].forEach(k => {
         const el = document.getElementById('seo-' + k);
         if (el) { if (!siteData.seo) siteData.seo = {}; siteData.seo[k] = el.value; }
       });
