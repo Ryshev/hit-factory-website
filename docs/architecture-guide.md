@@ -1,183 +1,278 @@
 # Architecture Guide — Static Multilingual Site with PHP Admin
 
-Reusable patterns from this project: static multilingual site with dynamic admin on shared hosting.
+Reusable patterns from this project: static multilingual site with dynamic admin panel on shared hosting. No frameworks, no database, no build tools beyond Node.js scripts.
 
 ## Overview
 
 ```
-┌─────────────┐    ┌──────────────┐    ┌────────────────┐
-│  i18n.js    │───►│ build-locales│───►│  /ru/index.html │
-│(translations)│   │    .js       │    │  /ua/index.html │
-└─────────────┘    └──────────────┘    │  /ge/index.html │
-                                       └───────┬────────┘
-                                               │
-                   ┌──────────────┐    ┌───────▼────────┐
-                   │  PHP Admin   │───►│ content.json   │
-                   │  /hf-manage/ │    │ (public file)  │
-                   └──────────────┘    └───────┬────────┘
-                                               │
-                                       ┌───────▼────────┐
-                                       │  Frontend JS   │
-                                       │ overrides HTML  │
-                                       └────────────────┘
+                    BUILD TIME                          RUNTIME
+                    ─────────                          ───────
+i18n.js ──► build-locales.js ──► Static HTML      ◄── content.json ◄── PHP Admin
+            (translations)       (SEO-friendly)       (dynamic edits)
+
+Static HTML = base layer (crawlers, no-JS fallback)
+content.json = dynamic layer (admin edits, instant updates)
 ```
 
-Two-layer content system:
-1. **Static HTML** (from build) — base content, SEO-friendly, works without JS
-2. **Dynamic JSON** (from admin) — overrides static content via JS on page load
+## 1. Two-Layer Content System
 
-## 1. Multilingual System
+### Why two layers?
 
-### URL slugs: country codes, not language codes
+| Layer | Written by | Read by | Purpose |
+|-------|-----------|---------|---------|
+| Static HTML | Build script | Crawlers + browsers | SEO, no-JS fallback |
+| content.json | PHP admin | Frontend JS | Instant admin edits |
+
+### What admin can change (no rebuild):
+- All text on all languages
+- Gallery (photos, order)
+- Custom code injection (analytics, meta tags)
+
+### What requires rebuild + deploy:
+- Adding/removing languages
+- HTML structure changes
+- Static meta tags (Google verification, Analytics)
+
+## 2. Multilingual System
+
+### URL slugs: country codes
 
 ```javascript
-// build-locales.js
 const SLUG_MAP = { en: 'en', ru: 'ru', uk: 'ua', ka: 'ge', hy: 'am', kk: 'kz' };
 ```
 
-hreflang uses ISO language codes (required by Google), URL slugs use country codes (user-friendly).
+hreflang uses ISO language codes (Google requirement), URLs use country codes (user-friendly).
 
-### Build script pattern
+### Build script flow
 
-```javascript
-// For each language:
-// 1. Replace data-i18n elements with translated text
-// 2. Set <html lang>, canonical, og:url, og:locale
-// 3. Fix asset paths (absolute for subdirectory pages)
-// 4. Insert hreflang tags
-// 5. Set active language in nav switcher
-// 6. Write to /{slug}/index.html
+```
+For each language:
+  1. Replace data-i18n elements → translated text in HTML
+  2. Set <html lang>, canonical, og:url, og:locale, og:title, og:description
+  3. Fix asset paths → absolute /paths for subdirectory locales
+  4. Insert hreflang tags, remove old ones
+  5. Set active language in nav switcher
+  6. Write to /{slug}/index.html
 ```
 
-### i18n.js role
+### i18n.js — build time only
 
-- **Build time**: source of translations for static HTML generation
-- **Runtime**: NOT used to overwrite text (static HTML already translated)
-- Only sets font classes for non-Latin scripts (Georgian, Armenian)
+At runtime, i18n.js does NOT overwrite text (static HTML already translated). It only:
+- Sets font classes for non-Latin scripts (Georgian, Armenian)
+- Sets footer year
 
-### content.json role
+### content.json — runtime override
 
-- Written by PHP admin on save
-- Read by frontend JS on page load
-- Overrides `data-i18n` elements with admin-edited text
-- Contains: gallery list, translations, stats, contacts, video config
+Frontend JS loads `/data/content.json` and:
+- Overrides `data-i18n` elements with admin-edited translations
+- Rebuilds gallery from admin photo list
+- Injects custom head/footer code
 
-### Why this two-layer approach?
+### Old slug redirects (.htaccess)
 
-- SEO crawlers see translated text in HTML (no JS needed)
-- Admin edits appear instantly without rebuild
-- Site works even if JS fails (graceful degradation)
-- No server-side rendering needed
+```apache
+RewriteRule ^uk/(.*)$ /ua/$1 [R=301,L]
+RewriteRule ^ka/(.*)$ /ge/$1 [R=301,L]
+```
 
-## 2. PHP Admin Panel
+301 redirects preserve SEO when changing URL structure.
 
-### No database, no framework
+### Language auto-detection
+
+```apache
+RewriteCond %{REQUEST_URI} ^/$
+RewriteCond %{HTTP:Accept-Language} ^ru [NC]
+RewriteRule ^$ /ru/ [R=302,L]
+```
+
+302 (not 301) so Google indexes all versions, not just the redirected one.
+
+## 3. PHP Admin Panel
+
+### Architecture: single-file API
 
 ```
 hf-manage/
 ├── index.html          # Login (honeypot + math CAPTCHA)
-├── dashboard.html      # SPA dashboard
-├── api.php             # All REST endpoints (single file router)
-├── config.php          # Secrets, paths
-├── .htaccess           # Route /api/* to api.php, block /data/
+├── dashboard.html      # SPA (vanilla JS, fetches from api.php)
+├── api.php             # All endpoints in one file (router by path)
+├── config.php          # AUTH_SECRET, SMTP, paths
+├── .htaccess           # Route /api/* → api.php, block /data/
 └── data/
-    ├── users.json              # Admin accounts (bcrypt hashed)
-    ├── site-data.json          # Full admin data
-    ├── translations-default.json # Exported from i18n.js for initial load
+    ├── users.json              # Accounts (bcrypt cost 12)
+    ├── site-data.json          # Full data (private)
+    ├── translations-default.json # From i18n.js (initial load)
     └── .htaccess               # Deny from all
 ```
 
-### Authentication
+### Auth: HMAC-signed cookies (no JWT library)
 
+```php
+$data = base64_encode(json_encode($payload));
+$sig = hash_hmac('sha256', $data, AUTH_SECRET);
+$token = $data . '.' . $sig;
+// Set as httpOnly, SameSite=Strict, 4h expiry
 ```
-HMAC-SHA256 signed cookie token (not JWT library — just hash_hmac)
-Token = base64(payload) + "." + HMAC(payload, secret)
-4-hour expiry, httpOnly, SameSite=Strict
+
+### Save flow: two files written
+
+```php
+// Private — full admin data
+file_put_contents(SITE_DATA_FILE, json_encode($input));
+
+// Public — subset for frontend
+$public = [
+    'gallery' => ..., 'translations' => ...,
+    'customHeadCode' => ..., 'customFooterCode' => ...
+];
+file_put_contents('data/content.json', json_encode($public));
 ```
 
-### Public content endpoint
+### Rate limiting (file-based)
 
-On save, PHP writes TWO files:
-1. `data/site-data.json` — full admin data (protected)
-2. `data/content.json` — public subset (gallery, translations, stats)
-
-Frontend only reads the public file.
+```php
+// Store timestamps per IP+action in JSON file
+// Filter out entries older than window (15 min)
+// Block if count >= max (10)
+```
 
 ### Default translations loading
 
-On first run (no site-data.json), PHP loads `translations-default.json` which is pre-exported from `i18n.js` via Node.js:
+On first run (no site-data.json), PHP loads `translations-default.json` — pre-exported from i18n.js:
 
 ```bash
-node -e "...parse i18n.js..." > site/hf-manage/data/translations-default.json
+node -e "
+const fs = require('fs');
+const src = fs.readFileSync('site/js/i18n.js', 'utf8');
+const match = src.match(/const translations\s*=\s*(\{[\s\S]*?\n\};)/);
+const obj = new Function('return ' + match[1].replace(/;$/, ''))();
+fs.writeFileSync('translations-default.json', JSON.stringify(obj, null, 2));
+"
 ```
 
-## 3. Gallery System
+### Admin sidebar structure
 
-### CSS: auto-fill grid
+```
+Languages (per-locale editing):
+  🇬🇧 English → tabs: Hero | About | Nav | Gallery & Video | Contact | Footer | SEO
+  🇷🇺 Russian → same tabs, Russian text
+  ... (6 languages)
+
+Site-wide:
+  Gallery     → drag-and-drop, upload, delete
+  Settings    → Contact | Video | Statistics | Code Injection
+  Admins      → user management (superadmin only)
+```
+
+### Code Injection
+
+Admin can add arbitrary HTML to head and footer via Settings → Code Injection.
+Injected by frontend JS from content.json (not static HTML).
+
+**Important:** For Google verification and Analytics, put in static HTML template instead — crawlers don't execute JS reliably.
+
+## 4. Gallery System
+
+### Varied grid layout (JS-driven)
+
+```javascript
+const GRID_COLS = 6;
+const ROW_PATTERNS = [[3,3], [2,2,2], [2,4], [4,2], [3,3], [2,2,2]];
+
+// Last row: distribute remaining items evenly across 6 columns
+const base = Math.floor(GRID_COLS / remaining);
+let extra = GRID_COLS % remaining;
+```
+
+Guarantees every row fills all 6 columns, with varied item widths.
+
+### CSS
 
 ```css
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-auto-rows: 300px;
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-rows: 280px;
   gap: 8px;
 }
+/* JS sets: item.style.gridColumn = 'span X' */
 ```
 
-Adapts to any number of photos — no JS layout logic needed.
+### Responsive (CSS media queries)
 
-### Dynamic loading
-
-```javascript
-// Frontend loads gallery from content.json
-const data = await fetch('/data/content.json').then(r => r.json());
-galleryGrid.innerHTML = data.gallery.map(src =>
-  `<div class="gallery-item"><img src="/${src}">...</div>`
-).join('');
+```
+Desktop: repeat(6, 1fr) — JS assigns patterns
+Tablet:  repeat(4, 1fr) — JS patterns adapt
+Mobile:  repeat(2, 1fr) — all items span 1
 ```
 
-### Admin gallery
-
-- Drag-and-drop reorder (HTML5 Drag API)
-- Upload via drag-drop zone or file picker (multer on Node.js / move_uploaded_file on PHP)
-- Delete photos
-- Add from existing server images
-
-## 4. YouTube Embed (Lite Pattern)
+## 5. YouTube Embed (Lite Pattern)
 
 ```html
-<div class="lite-youtube" data-videoid="VIDEO_ID">
-  <div class="lite-youtube-poster" style="background-image:url('poster.avif')"></div>
+<div class="lite-youtube" data-videoid="ID">
+  <div class="lite-youtube-poster" style="background-image:url(poster.avif)"></div>
   <button class="lite-youtube-playbtn">▶</button>
 </div>
 ```
 
-Key details:
-- `pointer-events: none` on poster/button — clicks reach container div
-- `enablejsapi=1` in iframe URL — enables postMessage control
-- `youtube-nocookie.com` for privacy
+- `pointer-events: none` on children — clicks reach container
+- `enablejsapi=1` — allows postMessage pause/play
 - Pause on `visibilitychange` (tab switch)
-- Pause on `IntersectionObserver` (scroll out of viewport)
+- Pause via `IntersectionObserver` (scroll away)
+- `youtube-nocookie.com` for GDPR
 
-## 5. Deployment (Shared Hosting)
+## 6. Responsive Design Patterns
+
+### Fluid typography (no breakpoint needed)
+
+```css
+font-size: clamp(60px, 15vw, 180px);    /* Hero title */
+letter-spacing: clamp(4px, 1.5vw, 12px); /* Adapts with screen */
+padding: 0 clamp(16px, 4vw, 24px);       /* Container padding */
+```
+
+### Animated gradient text
+
+```css
+.accent {
+  background: linear-gradient(90deg, pink, purple, blue, pink);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  animation: gradientShift 5s ease-in-out infinite;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+```
+
+### Seamless section transitions
+
+```css
+/* Hero overlay ends at exact color of next section */
+linear-gradient(180deg, ..., var(--color-surface) 100%)
+```
+
+## 7. Deployment (Shared Hosting)
 
 ### SSH on Namecheap
 
-```
-Port: 21098 (not 22)
-SSH Access must be enabled in cPanel
-Import public key via cPanel → SSH Access → Import Key → Authorize
-```
+- Port: **21098** (not 22)
+- Enable SSH in cPanel → SSH Access
+- Import public key only → Authorize
 
 ### SSL via acme.sh
 
 ```bash
+curl https://get.acme.sh | sh
 ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 ~/.acme.sh/acme.sh --register-account -m email@example.com
-~/.acme.sh/acme.sh --issue -d domain.com --webroot ~/public_html
+~/.acme.sh/acme.sh --issue -d domain.com -d www.domain.com --webroot ~/public_html
 ~/.acme.sh/acme.sh --deploy -d domain.com --deploy-hook cpanel_uapi
-# Auto-renewal via cron — set up automatically
 ```
+
+Auto-renewal via cron (set up automatically by acme.sh).
 
 ### .htaccess essentials
 
@@ -186,37 +281,44 @@ Import public key via cPanel → SSH Access → Import Key → Authorize
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
-# Old slug redirects (301 for SEO)
+# Old slug redirects
 RewriteRule ^uk/(.*)$ /ua/$1 [R=301,L]
 
-# Language detection (302 — don't cache)
+# Language detection (302!)
 RewriteCond %{REQUEST_URI} ^/$
 RewriteCond %{HTTP:Accept-Language} ^ru [NC]
 RewriteRule ^$ /ru/ [R=302,L]
 
-# Caching + compression
+# Caching
 ExpiresByType image/avif "access plus 1 year"
+
+# Compression
 AddOutputFilterByType DEFLATE text/html text/css application/javascript
 ```
 
-## 6. Performance
+## 8. Security Checklist
 
-- AVIF images (5-10x smaller than JPEG)
-- Lazy loading (`loading="lazy"`)
-- YouTube facade (zero KB until click)
-- Google Fonts with `display=swap`
-- Gzip compression + cache headers
-- No JavaScript frameworks (~5KB total JS)
+- [x] HMAC-signed httpOnly cookies (not localStorage)
+- [x] bcrypt passwords (cost 12)
+- [x] SameSite=Strict cookies
+- [x] Rate limiting on auth endpoints
+- [x] Honeypot + CAPTCHA on login
+- [x] Data directory blocked by .htaccess
+- [x] noindex/nofollow on admin pages
+- [x] Path traversal protection (basename)
+- [x] Cannot delete last superadmin
+- [x] Old slug 301 redirects (SEO preservation)
+- [x] Google verification in static HTML (not JS)
 
-## 7. Reuse Checklist
+## 9. Reuse Checklist
 
-1. Fork repository
+1. Fork/copy this repository
 2. Replace images in `site/images/`
 3. Edit translations in `site/js/i18n.js`
-4. Update `site/index.html` — sections, contacts
-5. Update `site/hf-manage/config.php` — secrets, admin email
-6. Update `SLUG_MAP` in `build-locales.js` if different locales
+4. Update `site/index.html` — sections, contacts, structure
+5. Update `SLUG_MAP` in `build-locales.js`
+6. Update `site/hf-manage/config.php` — AUTH_SECRET, admin email
 7. Run `node build-locales.js`
-8. Export translations: `node -e "..." > translations-default.json`
-9. Update `sitemap.xml` with correct domain
+8. Export translations JSON for admin
+9. Update `sitemap.xml`, `.htaccess` with correct domain/slugs
 10. Deploy via SCP, install SSL via acme.sh
