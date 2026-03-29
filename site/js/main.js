@@ -66,8 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- Load dynamic content from admin ---- */
   const galleryGrid = document.querySelector('.gallery-grid');
   const GRID_COLS = 6;
-  // Row patterns that sum to 6
-  const ROW_PATTERNS = [[3,3],[2,2,2],[2,4],[4,2],[3,3],[2,2,2]];
+  // Row patterns that sum to 6 — varied widths, no two rows look the same in sequence
+  const ROW_PATTERNS = [[4,2],[2,2,2],[3,3],[2,4],[2,2,2],[3,3],[4,2],[2,2,2]];
 
   function layoutGallery(container) {
     const items = Array.from(container.querySelectorAll('.gallery-item'));
@@ -101,12 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let patIdx = 0;
     while (placed < bodyCount) {
       const remaining = bodyCount - placed;
-      // Don't overshoot: if remaining is 2 or 3, use matching pattern
       if (remaining === 2) {
-        plan.push([3, 3]);
+        // Use asymmetric split for variety
+        plan.push(patIdx % 2 === 0 ? [4, 2] : [2, 4]);
         placed += 2;
       } else if (remaining === 3) {
-        plan.push([2, 2, 2]);
+        plan.push(patIdx % 2 === 0 ? [1, 3, 2] : [2, 1, 3]);
         placed += 3;
       } else {
         const pat = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
