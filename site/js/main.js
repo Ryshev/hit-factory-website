@@ -74,32 +74,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const count = items.length;
     if (!count) return;
 
-    // Figure out how many items in last row to make it even
-    // Try last row sizes 2 and 3 — pick whichever leaves the rest divisible by pattern lengths
+    // Strategy: plan from the end
+    // Last row = 2 items (span 3 each) or 3 items (span 2 each)
+    // All other rows = varied patterns from ROW_PATTERNS
+    //
+    // Each pattern uses 2 or 3 items. So we need:
+    // (count - lastRowSize) to be achievable with combos of 2s and 3s
+    // Try lastRowSize=2 first, then 3
     let lastRowSize = 2;
-    if (count % 2 === 1) lastRowSize = 3;
-    if (count <= 3) lastRowSize = count;
+    const bodyCount2 = count - 2;
+    const bodyCount3 = count - 3;
+    // Check if body is achievable (any combo of 2 and 3 works for n >= 2)
+    if (count <= 3) {
+      lastRowSize = count;
+    } else if (bodyCount2 >= 2) {
+      lastRowSize = 2;
+    } else {
+      lastRowSize = 3;
+    }
 
-    const mainCount = count - lastRowSize;
+    const bodyCount = count - lastRowSize;
 
-    // Build varied rows for main items
+    // Fill body rows with patterns
     const plan = [];
     let placed = 0;
     let patIdx = 0;
-    while (placed < mainCount) {
-      const pat = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
-      plan.push(pat);
-      placed += pat.length;
-      patIdx++;
+    while (placed < bodyCount) {
+      const remaining = bodyCount - placed;
+      // Don't overshoot: if remaining is 2 or 3, use matching pattern
+      if (remaining === 2) {
+        plan.push([3, 3]);
+        placed += 2;
+      } else if (remaining === 3) {
+        plan.push([2, 2, 2]);
+        placed += 3;
+      } else {
+        const pat = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
+        plan.push(pat);
+        placed += pat.length;
+        patIdx++;
+      }
     }
 
-    // Last row — equal sizes
-    if (lastRowSize > 0) {
+    // Last row — equal widths, fills full 6 columns
+    if (lastRowSize === 1) {
+      plan.push([6]);
+    } else {
       const spanEach = Math.floor(GRID_COLS / lastRowSize);
       plan.push(Array(lastRowSize).fill(spanEach));
     }
 
-    // Apply spans
+    // Apply
     let idx = 0;
     for (const row of plan) {
       for (const span of row) {
