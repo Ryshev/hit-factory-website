@@ -63,15 +63,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   revealElements.forEach(el => revealObserver.observe(el));
 
+  /* ---- Dynamic gallery from content.json ---- */
+  const galleryGrid = document.querySelector('.gallery-grid');
+
+  async function loadGallery() {
+    try {
+      const res = await fetch('/data/content.json');
+      if (!res.ok) return; // No content.json yet — use HTML defaults
+      const data = await res.json();
+      if (data.gallery && data.gallery.length > 0 && galleryGrid) {
+        galleryGrid.innerHTML = data.gallery.map(src =>
+          `<div class="gallery-item"><img src="/${src}" alt="Hit Factory live" loading="lazy"><div class="gallery-overlay"></div></div>`
+        ).join('');
+        initLightbox();
+        // Observe new items for scroll reveal
+        galleryGrid.querySelectorAll('.gallery-item').forEach(el => {
+          el.classList.add('reveal');
+          revealObserver.observe(el);
+        });
+      }
+    } catch (e) { /* Use HTML defaults */ }
+  }
+
+  loadGallery();
+
   /* ---- Gallery lightbox ---- */
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
-  const galleryItems = document.querySelectorAll('.gallery-item');
   let currentIndex = 0;
+  let galleryImages = [];
 
-  const galleryImages = Array.from(galleryItems).map(item =>
-    item.querySelector('img').src
-  );
+  function initLightbox() {
+    const items = document.querySelectorAll('.gallery-item');
+    galleryImages = Array.from(items).map(item => item.querySelector('img').src);
+    items.forEach((item, index) => {
+      item.addEventListener('click', () => openLightbox(index));
+    });
+  }
 
   function openLightbox(index) {
     currentIndex = index;
@@ -90,9 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
     lightboxImg.src = galleryImages[currentIndex];
   }
 
-  galleryItems.forEach((item, index) => {
-    item.addEventListener('click', () => openLightbox(index));
-  });
+  // Init lightbox for HTML-default gallery items
+  initLightbox();
 
   document.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
   document.querySelector('.lightbox-prev').addEventListener('click', () => navigateLightbox(-1));

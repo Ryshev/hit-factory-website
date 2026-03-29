@@ -391,6 +391,16 @@ if ($path === 'data' && $method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     if ($input) {
         file_put_contents(SITE_DATA_FILE, json_encode($input, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        // Write public content file for frontend to read
+        $publicContent = [
+            'gallery' => $input['gallery'] ?? [],
+            'stats' => $input['stats'] ?? [],
+            'contact' => $input['contact'] ?? [],
+            'video' => $input['video'] ?? []
+        ];
+        $publicDir = dirname(__DIR__) . '/data';
+        if (!is_dir($publicDir)) mkdir($publicDir, 0755, true);
+        file_put_contents($publicDir . '/content.json', json_encode($publicContent, JSON_UNESCAPED_UNICODE));
         echo json_encode(['success' => true]);
     } else {
         http_response_code(400);
