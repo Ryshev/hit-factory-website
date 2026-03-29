@@ -63,7 +63,7 @@ img {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 clamp(16px, 4vw, 24px);
 }
 
 /* ========================================
@@ -94,14 +94,15 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 
 .nav-logo {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: clamp(16px, 3vw, 28px);
   font-weight: 700;
-  letter-spacing: 4px;
+  letter-spacing: clamp(1px, 0.5vw, 4px);
   background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -230,8 +231,8 @@ img {
     linear-gradient(180deg,
       rgba(10, 10, 10, 0.4) 0%,
       rgba(10, 10, 10, 0.2) 40%,
-      rgba(10, 10, 10, 0.6) 70%,
-      rgba(10, 10, 10, 0.95) 100%
+      rgba(10, 10, 10, 0.5) 65%,
+      #0a0a0a 100%
     ),
     linear-gradient(90deg,
       rgba(226, 58, 110, 0.1) 0%,
@@ -244,7 +245,7 @@ img {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 0 24px;
+  padding: 0 clamp(16px, 5vw, 48px);
 }
 
 .hero-title {
@@ -255,23 +256,31 @@ img {
 
 .hero-title-line {
   display: block;
-  font-size: clamp(80px, 15vw, 180px);
+  font-size: clamp(60px, 15vw, 180px);
   font-weight: 700;
-  letter-spacing: 12px;
+  letter-spacing: clamp(4px, 1.5vw, 12px);
   color: var(--color-text);
 }
 
 .hero-title-line.accent {
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2), var(--color-blue));
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2), var(--color-blue), var(--color-accent));
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: gradientShift 4s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .hero-subtitle {
-  font-size: clamp(16px, 2vw, 22px);
+  font-size: clamp(14px, 2vw, 22px);
   font-weight: 300;
-  letter-spacing: 8px;
+  letter-spacing: clamp(3px, 1vw, 8px);
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 16px;
@@ -952,6 +961,18 @@ img {
 
   .nav-lang {
     order: 2;
+    gap: 1px;
+    padding: 2px;
+  }
+
+  .lang-btn {
+    padding: 4px 5px;
+    font-size: 10px;
+  }
+
+  .nav-container {
+    padding: 0 12px;
+    gap: 8px;
   }
 
   .section {
