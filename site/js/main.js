@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadDynamicContent() {
     try {
-      const res = await fetch('/data/content.json');
+      const res = await fetch('/data/content.json?t=' + Date.now());
       if (!res.ok) return;
       const data = await res.json();
 
