@@ -74,34 +74,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const count = items.length;
     if (!count) return;
 
-    // Plan rows so last row has 2 or 3 items
-    // Each pattern uses 2 or 3 items per row
+    // Figure out how many items in last row to make it even
+    // Try last row sizes 2 and 3 — pick whichever leaves the rest divisible by pattern lengths
+    let lastRowSize = 2;
+    if (count % 2 === 1) lastRowSize = 3;
+    if (count <= 3) lastRowSize = count;
+
+    const mainCount = count - lastRowSize;
+
+    // Build varied rows for main items
     const plan = [];
     let placed = 0;
     let patIdx = 0;
+    while (placed < mainCount) {
+      const pat = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
+      plan.push(pat);
+      placed += pat.length;
+      patIdx++;
+    }
 
-    while (placed < count) {
-      const remaining = count - placed;
-
-      if (remaining === 2) {
-        plan.push([3, 3]); // 2 items, each span 3
-        placed += 2;
-      } else if (remaining === 3) {
-        plan.push([2, 2, 2]); // 3 items, each span 2
-        placed += 3;
-      } else if (remaining === 4) {
-        plan.push([3, 3]); // 2 items
-        placed += 2; // leaves 2 for last row
-      } else if (remaining === 5) {
-        plan.push([2, 2, 2]); // 3 items
-        placed += 3; // leaves 2 for last row
-      } else {
-        // 6+ remaining — use pattern
-        const pat = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
-        plan.push(pat);
-        placed += pat.length;
-        patIdx++;
-      }
+    // Last row — equal sizes
+    if (lastRowSize > 0) {
+      const spanEach = Math.floor(GRID_COLS / lastRowSize);
+      plan.push(Array(lastRowSize).fill(spanEach));
     }
 
     // Apply spans
