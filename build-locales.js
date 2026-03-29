@@ -134,10 +134,10 @@ function prepareForLocale(html, lang) {
     html = html.replace(/url\('images\//g, "url('/images/");
   }
 
-  // Cache busting — append version to CSS and JS
-  html = html.replace(/(styles\.css)/g, `$1?v=${VERSION}`);
-  html = html.replace(/(i18n\.js)/g, `$1?v=${VERSION}`);
-  html = html.replace(/(main\.js)/g, `$1?v=${VERSION}`);
+  // Cache busting — replace or append version to CSS and JS
+  html = html.replace(/styles\.css(\?v=[^"]*)?/g, `styles.css?v=${VERSION}`);
+  html = html.replace(/i18n\.js(\?v=[^"]*)?/g, `i18n.js?v=${VERSION}`);
+  html = html.replace(/main\.js(\?v=[^"]*)?/g, `main.js?v=${VERSION}`);
 
   // Fix OG image to always use absolute URL
   html = html.replace(

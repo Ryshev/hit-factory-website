@@ -43,19 +43,65 @@
   <meta name="twitter:image" content="https://hitfactory.band/images/og-image.jpg">
 
   <!-- JSON-LD Structured Data -->
+  <!-- Structured Data: MusicGroup + EntertainmentBusiness + WebSite -->
   <script type="application/ld+json">
-  {
+  [{
     "@context": "https://schema.org",
     "@type": "MusicGroup",
     "name": "Hit Factory",
-    "description": "Professional cover band delivering unforgettable live performances.",
-    "genre": "Cover Band",
+    "alternateName": "Hit Factory Band",
+    "description": "Premium cover band fronted by the ex-guitarist of Gradusy. Live performances of iconic world hits in English, Russian, Georgian, Armenian, Kazakh and more.",
+    "genre": ["Cover Band", "Pop", "Rock", "Dance"],
     "numberOfMembers": 5,
     "url": "https://hitfactory.band",
     "email": "hitfactorymusicband@gmail.com",
+    "telephone": ["+995591224281", "+995555258369"],
+    "image": "https://hitfactory.band/images/og-image.jpg",
+    "logo": "https://hitfactory.band/favicon.svg",
+    "sameAs": ["https://www.instagram.com/hitfactory_band"],
+    "knowsLanguage": ["en", "ru", "ka", "hy", "kk"],
+    "areaServed": ["Georgia", "Armenia", "Kazakhstan", "International"],
+    "makesOffer": {
+      "@type": "Offer",
+      "name": "Live Music Performance",
+      "description": "Professional live cover band for weddings, corporate events, birthdays and private celebrations. Full band, trio or acoustic set.",
+      "category": "Entertainment",
+      "availableChannel": {
+        "@type": "ServiceChannel",
+        "serviceUrl": "https://hitfactory.band/#contact",
+        "servicePhone": "+995591224281"
+      }
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "EntertainmentBusiness",
+    "name": "Hit Factory — Premium Cover Band",
+    "description": "Premium cover band for weddings, corporate events and private celebrations",
+    "url": "https://hitfactory.band",
+    "email": "hitfactorymusicband@gmail.com",
     "telephone": "+995591224281",
+    "image": "https://hitfactory.band/images/og-image.jpg",
+    "priceRange": "$$",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "GE",
+      "addressLocality": "Tbilisi"
+    },
     "sameAs": ["https://www.instagram.com/hitfactory_band"]
-  }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Hit Factory",
+    "url": "https://hitfactory.band",
+    "inLanguage": ["en", "ru", "uk", "ka", "hy", "kk"],
+    "potentialAction": {
+      "@type": "CommunicateAction",
+      "target": "https://hitfactory.band/#contact",
+      "name": "Book Hit Factory"
+    }
+  }]
   </script>
 
   <!-- Fonts: Oswald (Latin + Cyrillic), Noto Sans Georgian, Noto Sans Armenian -->
@@ -63,7 +109,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Noto+Sans+Georgian:wght@400;600;700&family=Noto+Sans+Armenian:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css?v=20260329-2057?v=20260329-2049?v=20260329-2042">
+  <link rel="stylesheet" href="css/styles.css?v=20260329-2114">
 
   <link rel="alternate" hreflang="en" href="https://hitfactory.band/">
   <link rel="alternate" hreflang="ru" href="https://hitfactory.band/ru/">
@@ -296,7 +342,7 @@
   <!-- Custom Footer Code (injected from admin) -->
   <div id="custom-footer-code" style="display:none"></div>
 
-  <script src="js/i18n.js?v=20260329-2057?v=20260329-2049?v=20260329-2042"></script>
-  <script src="js/main.js?v=20260329-2057?v=20260329-2049?v=20260329-2042"></script>
+  <script src="js/i18n.js?v=20260329-2114"></script>
+  <script src="js/main.js?v=20260329-2114"></script>
 </body>
 </html>
