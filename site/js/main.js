@@ -65,37 +65,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---- Load dynamic content from admin ---- */
   const galleryGrid = document.querySelector('.gallery-grid');
-  const GRID_COLS = 6;
-  // Row patterns that sum to 6 — varied widths, no two rows look the same in sequence
-  const ROW_PATTERNS = [[4,2],[2,2,2],[3,3],[2,4],[2,2,2],[3,3],[4,2],[2,2,2]];
+  // Detect actual CSS grid columns
+  function getGridCols(container) {
+    const style = getComputedStyle(container);
+    return style.gridTemplateColumns.split(' ').length;
+  }
+
+  // Row patterns for 6-col grid (sum to 6)
+  const PATTERNS_6 = [[4,2],[2,2,2],[3,3],[2,4],[2,2,2],[3,3],[4,2],[2,2,2]];
 
   function layoutGallery(container) {
     const items = Array.from(container.querySelectorAll('.gallery-item'));
     const count = items.length;
     if (!count) return;
 
-    // Strategy: plan from the end
-    // Last row = 2 items (span 3 each) or 3 items (span 2 each)
-    // All other rows = varied patterns from ROW_PATTERNS
-    //
-    // Each pattern uses 2 or 3 items. So we need:
-    // (count - lastRowSize) to be achievable with combos of 2s and 3s
-    // Try lastRowSize=2 first, then 3
-    let lastRowSize = 2;
-    const bodyCount2 = count - 2;
-    const bodyCount3 = count - 3;
-    // Check if body is achievable (any combo of 2 and 3 works for n >= 2)
-    if (count <= 3) {
-      lastRowSize = count;
-    } else if (bodyCount2 >= 2) {
-      lastRowSize = 2;
-    } else {
-      lastRowSize = 3;
+    const cols = getGridCols(container);
+
+    // On small grids (<=3 cols) — all items span 1, no JS layout needed
+    if (cols <= 3) {
+      items.forEach(el => el.style.gridColumn = '');
+      return;
     }
 
+    // 6-column layout with varied rows
+    // Last row: 2 items (span 3 each) or 3 items (span 2 each)
+    let lastRowSize = count <= 3 ? count : (count % 2 === 0 ? 2 : 3);
     const bodyCount = count - lastRowSize;
 
-    // Fill body rows with patterns
     const plan = [];
     let placed = 0;
     let patIdx = 0;
@@ -108,15 +104,15 @@ document.addEventListener('DOMContentLoaded', () => {
         plan.push([2, 2, 2]);
         placed += 3;
       } else {
-        const pat = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
+        const pat = PATTERNS_6[patIdx % PATTERNS_6.length];
         plan.push(pat);
         placed += pat.length;
         patIdx++;
       }
     }
 
-    // Last row — equal widths
-    const spanEach = lastRowSize === 2 ? 3 : 2;
+    // Last row — equal widths filling all 6 cols
+    const spanEach = Math.floor(cols / lastRowSize);
     plan.push(Array(lastRowSize).fill(spanEach));
 
     // Apply
@@ -144,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
           .map(src =>
             `<div class="gallery-item"><img src="/${src}" alt="Hit Factory live" loading="lazy"><div class="gallery-overlay"></div></div>`
           ).join('');
-        if (window.innerWidth > 968) layoutGallery(galleryGrid);
+        layoutGallery(galleryGrid);
         initLightbox();
         galleryGrid.querySelectorAll('.gallery-item').forEach(el => {
           el.classList.add('reveal');
@@ -179,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (e) {
       // Fallback: layout static gallery items
-      if (galleryGrid && window.innerWidth > 968) layoutGallery(galleryGrid);
+      if (galleryGrid) layoutGallery(galleryGrid);
     }
   }
 
