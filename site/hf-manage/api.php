@@ -396,7 +396,8 @@ if ($path === 'data' && $method === 'POST') {
             'gallery' => $input['gallery'] ?? [],
             'stats' => $input['stats'] ?? [],
             'contact' => $input['contact'] ?? [],
-            'video' => $input['video'] ?? []
+            'video' => $input['video'] ?? [],
+            'translations' => $input['translations'] ?? []
         ];
         $publicDir = dirname(__DIR__) . '/data';
         if (!is_dir($publicDir)) mkdir($publicDir, 0755, true);

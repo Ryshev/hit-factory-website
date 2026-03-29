@@ -553,9 +553,8 @@ img {
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-auto-rows: 280px;
-  grid-auto-flow: dense;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: 300px;
   gap: 8px;
 }
 
@@ -566,9 +565,7 @@ img {
   cursor: pointer;
 }
 
-.gallery-item.span-2 { grid-column: span 2; }
-.gallery-item.span-3 { grid-column: span 3; }
-.gallery-item.span-tall { grid-row: span 2; }
+/* Gallery spans removed — auto-fill handles layout */
 
 .gallery-item img {
   width: 100%;
@@ -915,11 +912,9 @@ img {
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 200px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-auto-rows: 220px;
   }
-  .gallery-item.span-3 { grid-column: span 2; }
-  .gallery-item.span-tall { grid-row: span 1; }
 
   .contact-grid {
     grid-template-columns: 1fr;
@@ -984,11 +979,9 @@ img {
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     grid-auto-rows: 180px;
   }
-  .gallery-item.span-3, .gallery-item.span-2 { grid-column: span 1; }
-  .gallery-item.span-tall { grid-row: span 1; }
 
   .footer-content {
     flex-direction: column;
