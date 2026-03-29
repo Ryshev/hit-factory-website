@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Hit Factory</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .container { padding: 24px; }
+    .code {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(100px, 20vw, 200px);
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0, #00b4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .message {
+      font-size: 18px;
+      color: #999;
+      margin: 16px 0 32px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 14px 40px;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: 0.3s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(226,58,110,0.4); }
+    .logo {
+      font-family: 'Oswald', sans-serif;
+      font-size: 20px;
+      letter-spacing: 4px;
+      color: #444;
+      margin-top: 48px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="code">404</div>
+    <p class="message">This page doesn't exist. But the music plays on.</p>
+    <a href="/" class="btn">Back to Hit Factory</a>
+    <div class="logo">HIT FACTORY</div>
+  </div>
+</body>
+</html>

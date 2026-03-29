@@ -348,8 +348,16 @@ main.js?v=20260329-2117
 ```
 Generated automatically by `build-locales.js`. Forces cache clear on all devices after deploy.
 
+## 404 Page
+
+Custom error page matching site design — gradient "404", brand colors, link back to home. Configured via `.htaccess`:
+```apache
+ErrorDocument 404 /404.html
+```
+
 ## Performance
 
+- **Preload hero image** — `<link rel="preload" href="images/hero-bg.avif" as="image">` for faster first paint
 - AVIF images (5-10x smaller than JPEG)
 - Lazy loading (`loading="lazy"`) on all below-fold images
 - YouTube facade (zero network requests until play)
@@ -358,6 +366,10 @@ Generated automatically by `build-locales.js`. Forces cache clear on all devices
 - No JavaScript frameworks (~6KB total JS)
 - Fluid typography with `clamp()` — no layout shifts on resize
 - CSS/JS cache busting via versioned query strings
+
+## GDPR / Cookie Consent
+
+Google Analytics sets cookies (`_ga`, `_gid`). GDPR technically requires consent for EU visitors. Currently not implemented — main audience is CIS/Georgia. Add cookie consent banner if expanding to EU market.
 
 ## Testing Checklist
 
@@ -398,6 +410,8 @@ No automated tests (project is a static site + simple PHP API). Use this manual 
 - [ ] Old slugs (/uk/, /ka/, /hy/, /kk/) 301-redirect to new ones
 - [ ] Schema.org JSON-LD: MusicGroup + EntertainmentBusiness + WebSite
 - [ ] CSS/JS have single `?v=` version (no duplication)
+- [ ] 404 page shows custom design (test: `/nonexistent-page`)
+- [ ] Hero image preloaded (`<link rel="preload">` in `<head>`)
 
 ### Security
 - [ ] Admin pages return `X-Frame-Options: DENY`

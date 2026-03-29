@@ -129,6 +129,7 @@ function prepareForLocale(html, lang) {
     html = html.replace(/src="js\//g, 'src="/js/');
     html = html.replace(/src="images\//g, 'src="/images/');
     html = html.replace(/srcset="images\//g, 'srcset="/images/');
+    html = html.replace(/href="images\//g, 'href="/images/');
     html = html.replace(/href="favicon\.svg"/g, 'href="/favicon.svg"');
     html = html.replace(/href="apple-touch-icon\.png"/g, 'href="/apple-touch-icon.png"');
     html = html.replace(/url\('images\//g, "url('/images/");
