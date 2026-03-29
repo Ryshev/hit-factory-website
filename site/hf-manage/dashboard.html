@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Hit Factory — Admin Panel</title>
+  <style>
+    :root {
+      --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424; --surface3: #2e2e2e;
+      --border: #333; --text: #e5e5e5; --muted: #888; --accent: #e23a6e;
+      --accent2: #6c3ce0; --success: #22c55e; --danger: #ef4444;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Header */
+    .header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header h1 {
+      font-size: 18px; font-weight: 600;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .header .actions { display: flex; gap: 8px; }
+
+    /* Buttons */
+    .btn { padding: 8px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-outline { background: none; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-danger { background: var(--danger); color: white; }
+
+    /* Layout */
+    .layout { display: flex; min-height: calc(100vh - 53px); }
+
+    /* Sidebar */
+    .sidebar {
+      width: 200px; background: var(--surface); border-right: 1px solid var(--border);
+      padding: 12px 0; flex-shrink: 0; display: flex; flex-direction: column;
+    }
+    .sidebar-label { padding: 8px 16px; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 8px; padding: 9px 16px; color: var(--muted);
+      font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: none;
+      width: 100%; text-align: left; transition: 0.15s;
+    }
+    .sidebar-item:hover { color: var(--text); background: var(--surface2); }
+    .sidebar-item.active { color: var(--accent); background: rgba(226,58,110,0.08); border-right: 2px solid var(--accent); }
+    .sidebar-item .flag { font-size: 16px; }
+    .sidebar-divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* Content */
+    .content { flex: 1; padding: 28px 32px; max-width: 960px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .tab {
+      padding: 10px 20px; border: none; background: none; color: var(--muted);
+      font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent;
+      transition: 0.15s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Form */
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.5px; }
+    .field input, .field textarea, .field select {
+      width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 14px; font-family: inherit; transition: 0.15s;
+    }
+    .field input:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+    .field textarea { resize: vertical; min-height: 70px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* Gallery admin */
+    .gallery-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+    .gallery-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    }
+    .gallery-card {
+      position: relative; aspect-ratio: 3/4; border-radius: 8px; overflow: hidden;
+      border: 2px solid var(--border); cursor: grab; transition: 0.2s; background: var(--surface2);
+    }
+    .gallery-card:active { cursor: grabbing; }
+    .gallery-card.dragging { opacity: 0.4; border-color: var(--accent); }
+    .gallery-card.drag-over { border-color: var(--accent); transform: scale(1.02); }
+    .gallery-card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+    .gallery-card .card-actions {
+      position: absolute; top: 4px; right: 4px; display: flex; gap: 4px; opacity: 0; transition: 0.15s;
+    }
+    .gallery-card:hover .card-actions { opacity: 1; }
+    .gallery-card .card-btn {
+      width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .gallery-card .card-btn.delete { background: rgba(239,68,68,0.9); color: white; }
+    .gallery-card .card-order {
+      position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.7);
+      color: white; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+    }
+
+    /* Upload area */
+    .upload-area {
+      border: 2px dashed var(--border); border-radius: 12px; padding: 32px;
+      text-align: center; cursor: pointer; transition: 0.2s; margin-bottom: 24px;
+    }
+    .upload-area:hover, .upload-area.dragover { border-color: var(--accent); background: rgba(226,58,110,0.05); }
+    .upload-area p { color: var(--muted); font-size: 14px; }
+    .upload-area input { display: none; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; padding: 12px 24px;
+      background: var(--success); color: white; border-radius: 8px; font-weight: 600;
+      font-size: 14px; opacity: 0; transform: translateY(20px); transition: 0.3s; z-index: 1000;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+
+    /* Three-dot menu */
+    .dot-menu { position: relative; display: inline-block; }
+    .dot-menu-trigger {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-size: 18px; padding: 4px 8px; border-radius: 6px; line-height: 1;
+    }
+    .dot-menu-trigger:hover { background: var(--surface3); color: var(--text); }
+    .dot-menu-dropdown {
+      display: none; position: absolute; right: 0; top: 100%; margin-top: 4px;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      min-width: 140px; z-index: 50; overflow: hidden;
+    }
+    .dot-menu.open .dot-menu-dropdown { display: block; }
+    .dot-menu-item {
+      display: block; width: 100%; padding: 8px 14px; border: none; background: none;
+      color: var(--text); font-size: 13px; text-align: left; cursor: pointer; font-family: inherit;
+    }
+    .dot-menu-item:hover { background: var(--surface3); }
+    .dot-menu-item.danger { color: var(--danger); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="/" style="text-decoration:none"><h1>HIT FACTORY</h1></a>
+    <div class="actions">
+      <span id="userInfo" style="color:var(--muted);font-size:12px;margin-right:8px"></span>
+      <a href="/" class="btn btn-outline" target="_blank">View Site</a>
+      <button class="btn btn-primary" id="saveBtn">Save All</button>
+      <button class="btn btn-outline" id="logoutBtn" style="color:var(--danger)">Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-label">Languages</div>
+      <button class="sidebar-item active" data-page="lang" data-lang="en"><span class="flag">🇬🇧</span> English</button>
+      <button class="sidebar-item" data-page="lang" data-lang="ru"><span class="flag">🇷🇺</span> Russian</button>
+      <button class="sidebar-item" data-page="lang" data-lang="uk"><span class="flag">🇺🇦</span> Ukrainian</button>
+      <button class="sidebar-item" data-page="lang" data-lang="ka"><span class="flag">🇬🇪</span> Georgian</button>
+      <button class="sidebar-item" data-page="lang" data-lang="hy"><span class="flag">🇦🇲</span> Armenian</button>
+      <button class="sidebar-item" data-page="lang" data-lang="kk"><span class="flag">🇰🇿</span> Kazakh</button>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-label">Site</div>
+      <button class="sidebar-item" data-page="gallery">Gallery</button>
+      <button class="sidebar-item" data-page="settings">Settings</button>
+      <button class="sidebar-item" data-page="admins" id="adminsNav">Admins</button>
+    </nav>
+
+    <main class="content" id="contentArea"></main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Strip /dashboard suffix to get the admin base path
+    const ADMIN_BASE = window.location.pathname.replace(/\/dashboard(\.html)?\/?$/, '').replace(/\/+$/, '');
+    const LANGS = ['en','ru','uk','ka','hy','kk'];
+    const LANG_NAMES = {en:'English',ru:'Russian',uk:'Ukrainian',ka:'Georgian',hy:'Armenian',kk:'Kazakh'};
+
+    // Translation keys grouped by section
+    const SECTIONS = {
+      'Hero': ['hero.subtitle','hero.description','hero.cta'],
+      'About': ['about.tag','about.title','about.heading1','about.text1','about.heading2','about.text2',
+        'about.musicians','about.songs','about.events','about.years'],
+      'Navigation': ['nav.home','nav.about','nav.gallery','nav.video','nav.contact'],
+      'Gallery & Video': ['gallery.tag','gallery.title','video.tag','video.title','video.subtitle'],
+      'Contact': ['contact.tag','contact.title','contact.description','contact.phone','contact.email'],
+      'Footer': ['footer.rights']
+    };
+
+    let siteData = {};
+    let galleryOrder = [];
+    let currentPage = 'lang';
+    let currentLang = 'en';
+
+    // ===================== DATA =====================
+    async function loadData() {
+      const res = await fetch(ADMIN_BASE + '/api/data');
+      siteData = await res.json();
+      // Ensure translations exist for all langs
+      if (!siteData.translations) siteData.translations = {};
+      LANGS.forEach(l => { if (!siteData.translations[l]) siteData.translations[l] = {}; });
+      galleryOrder = [...(siteData.gallery || [])];
+      render();
+    }
+
+    async function saveAll() {
+      // Collect current page data before saving
+      collectCurrentPage();
+      siteData.gallery = [...galleryOrder];
+      const res = await fetch(ADMIN_BASE + '/api/data', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(siteData)
+      });
+      const r = await res.json();
+      if (r.success) showToast('Saved successfully!');
+      else showToast('Error saving');
+    }
+
+    // ===================== RENDER =====================
+    function render() {
+      if (currentPage === 'lang') renderLangPage(currentLang);
+      else if (currentPage === 'gallery') renderGalleryPage();
+      else if (currentPage === 'settings') renderSettingsPage();
+    }
+
+    // ---- Language page ----
+    function renderLangPage(lang) {
+      const area = document.getElementById('contentArea');
+      const t = siteData.translations[lang] || {};
+
+      let tabsHtml = '';
+      let panelsHtml = '';
+      const sectionKeys = Object.keys(SECTIONS);
+      sectionKeys.push('SEO');
+
+      sectionKeys.forEach((sec, i) => {
+        const active = i === 0 ? ' active' : '';
+        tabsHtml += `<button class="tab${active}" data-tab="${sec}">${sec}</button>`;
+
+        if (sec === 'SEO') {
+          panelsHtml += `<div class="tab-panel${active}" id="tabpanel-${sec}">${renderSeoFields()}</div>`;
+        } else {
+          let fields = '';
+          SECTIONS[sec].forEach(key => {
+            const val = t[key] || '';
+            const isLong = key.includes('text') || key.includes('description');
+            fields += `<div class="field"><label>${key}</label>` +
+              (isLong
+                ? `<textarea data-lang="${lang}" data-key="${key}" rows="3">${esc(val)}</textarea>`
+                : `<input type="text" data-lang="${lang}" data-key="${key}" value="${escAttr(val)}">`) +
+              `</div>`;
+          });
+          panelsHtml += `<div class="tab-panel${active}" id="tabpanel-${sec}">${fields}</div>`;
+        }
+      });
+
+      area.innerHTML = `
+        <div class="page-title">${LANG_NAMES[lang]} Translation</div>
+        <div class="tabs">${tabsHtml}</div>
+        ${panelsHtml}
+      `;
+      initTabs();
+      initOgUpload();
+    }
+
+    function renderSeoFields() {
+      const s = siteData.seo || {};
+      const ogImg = s.ogImage || '';
+      const ogPath = ogImg.replace(/^https?:\/\/[^/]+\//, '');
+      return `
+        <div class="field"><label>Page Title</label><input type="text" id="seo-title" value="${escAttr(s.title||'')}"></div>
+        <div class="field"><label>Meta Description</label><textarea id="seo-description" rows="3">${esc(s.description||'')}</textarea></div>
+        <div class="field"><label>Keywords</label><input type="text" id="seo-keywords" value="${escAttr(s.keywords||'')}"></div>
+        <div class="field"><label>Canonical URL</label><input type="text" id="seo-canonical" value="${escAttr(s.canonical||'')}"></div>
+        <div class="field">
+          <label>OG Image (1200×630px, shows when sharing on social media)</label>
+          <input type="text" id="seo-ogImage" value="${escAttr(ogImg)}" style="margin-bottom:8px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div id="ogPreview" style="width:300px;height:158px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--surface2);flex-shrink:0">
+              ${ogPath ? '<img src="/'+esc(ogPath)+'" style="width:100%;height:100%;object-fit:cover">' : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:12px">No image</div>'}
+            </div>
+            <div>
+              <div class="upload-area" id="ogUploadArea" style="padding:16px;margin:0">
+                <p style="font-size:12px">Drop image or click to upload</p>
+                <input type="file" id="ogUploadInput" accept=".jpg,.jpeg,.png,.webp" style="display:none">
+              </div>
+              <div class="field-hint" style="margin-top:6px">Recommended: 1200×630px JPEG. Auto-crops to correct aspect ratio.</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ---- Gallery page ----
+    function renderGalleryPage() {
+      const area = document.getElementById('contentArea');
+
+      let cards = '';
+      galleryOrder.forEach((src, i) => {
+        const fname = src.replace('images/', '');
+        cards += `
+          <div class="gallery-card" draggable="true" data-index="${i}" data-src="${src}">
+            <img src="/${src}" alt="" loading="lazy">
+            <div class="card-actions">
+              <button class="card-btn delete" onclick="removeFromGallery(${i})" title="Remove">&times;</button>
+            </div>
+            <div class="card-order">${i + 1}</div>
+          </div>`;
+      });
+
+      area.innerHTML = `
+        <div class="page-title">Gallery Management</div>
+        <div class="upload-area" id="uploadArea">
+          <p>Drop images here or click to upload</p>
+          <input type="file" id="uploadInput" multiple accept=".avif,.jpg,.jpeg,.png,.webp">
+        </div>
+        <div class="gallery-toolbar">
+          <span style="color:var(--muted);font-size:13px">${galleryOrder.length} photos · drag to reorder</span>
+          <button class="btn btn-outline btn-sm" onclick="addFromExisting()">Add from existing</button>
+        </div>
+        <div class="gallery-grid" id="galleryGrid">${cards}</div>
+      `;
+
+      initUpload();
+      initDragAndDrop();
+    }
+
+    // ---- Settings page ----
+    function renderSettingsPage() {
+      const area = document.getElementById('contentArea');
+      const c = siteData.contact || {};
+      const v = siteData.video || {};
+      const st = siteData.stats || {};
+
+      area.innerHTML = `
+        <div class="page-title">Settings</div>
+        <div class="tabs">
+          <button class="tab active" data-tab="contact">Contact</button>
+          <button class="tab" data-tab="video">Video</button>
+          <button class="tab" data-tab="stats">Statistics</button>
+        </div>
+        <div class="tab-panel active" id="tabpanel-contact">
+          <div class="field-row">
+            <div class="field"><label>Phone (display)</label><input type="text" id="contact-phone" value="${escAttr(c.phone||'')}"></div>
+            <div class="field"><label>Phone (tel: link)</label><input type="text" id="contact-phoneLink" value="${escAttr(c.phoneLink||'')}"></div>
+          </div>
+          <div class="field"><label>Email</label><input type="email" id="contact-email" value="${escAttr(c.email||'')}"></div>
+          <div class="field-row">
+            <div class="field"><label>Instagram Handle</label><input type="text" id="contact-instagram" value="${escAttr(c.instagram||'')}"></div>
+            <div class="field"><label>Instagram URL</label><input type="text" id="contact-instagramUrl" value="${escAttr(c.instagramUrl||'')}"></div>
+          </div>
+        </div>
+        <div class="tab-panel" id="tabpanel-video">
+          <div class="field"><label>YouTube Video ID</label><input type="text" id="video-youtubeId" value="${escAttr(v.youtubeId||'')}"></div>
+          <div class="field-hint">Extract from URL: youtube.com/watch?v=<b>VIDEO_ID</b></div>
+          <div class="field" style="margin-top:12px"><label>Poster Image</label><input type="text" id="video-posterImage" value="${escAttr(v.posterImage||'')}"></div>
+        </div>
+        <div class="tab-panel" id="tabpanel-stats">
+          <div class="field-row">
+            <div class="field"><label>Musicians</label><input type="text" id="stats-musicians" value="${escAttr(st.musicians||'')}"></div>
+            <div class="field"><label>Songs</label><input type="text" id="stats-songs" value="${escAttr(st.songs||'')}"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Events</label><input type="text" id="stats-events" value="${escAttr(st.events||'')}"></div>
+            <div class="field"><label>Years</label><input type="text" id="stats-years" value="${escAttr(st.years||'')}"></div>
+          </div>
+        </div>
+      `;
+      initTabs();
+    }
+
+    // ===================== OG IMAGE UPLOAD =====================
+    function initOgUpload() {
+      const area = document.getElementById('ogUploadArea');
+      const input = document.getElementById('ogUploadInput');
+      if (!area || !input) return;
+
+      area.addEventListener('click', () => input.click());
+      area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
+      area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+      area.addEventListener('drop', e => {
+        e.preventDefault(); area.classList.remove('dragover');
+        if (e.dataTransfer.files.length) uploadOgImage(e.dataTransfer.files[0]);
+      });
+      input.addEventListener('change', () => { if (input.files.length) uploadOgImage(input.files[0]); });
+    }
+
+    async function uploadOgImage(file) {
+      const form = new FormData();
+      form.append('photos', file);
+      showToast('Uploading OG image...');
+      const res = await fetch(ADMIN_BASE + '/api/images/upload', { method: 'POST', body: form });
+      const r = await res.json();
+      if (r.success && r.files.length) {
+        const imgPath = r.files[0];
+        const fullUrl = (siteData.seo?.canonical || 'https://hitfactory.band/').replace(/\/$/, '') + '/' + imgPath;
+        document.getElementById('seo-ogImage').value = fullUrl;
+        document.getElementById('ogPreview').innerHTML = '<img src="/' + imgPath + '" style="width:100%;height:100%;object-fit:cover">';
+        if (!siteData.seo) siteData.seo = {};
+        siteData.seo.ogImage = fullUrl;
+        showToast('OG image uploaded!');
+      }
+    }
+
+    // ===================== TABS =====================
+    function initTabs() {
+      document.querySelectorAll('.tabs .tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const parent = tab.closest('.content') || document.getElementById('contentArea');
+          parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          parent.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          const panel = parent.querySelector('#tabpanel-' + tab.dataset.tab);
+          if (panel) panel.classList.add('active');
+        });
+      });
+    }
+
+    // ===================== SIDEBAR NAV =====================
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        collectCurrentPage();
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        currentPage = item.dataset.page;
+        if (item.dataset.lang) currentLang = item.dataset.lang;
+        render();
+      });
+    });
+
+    // ===================== COLLECT DATA =====================
+    function collectCurrentPage() {
+      // Translations
+      document.querySelectorAll('[data-lang][data-key]').forEach(el => {
+        const lang = el.dataset.lang;
+        const key = el.dataset.key;
+        if (!siteData.translations[lang]) siteData.translations[lang] = {};
+        siteData.translations[lang][key] = el.value;
+      });
+      // SEO
+      ['title','description','keywords','canonical','ogImage'].forEach(k => {
+        const el = document.getElementById('seo-' + k);
+        if (el) { if (!siteData.seo) siteData.seo = {}; siteData.seo[k] = el.value; }
+      });
+      // Contact
+      ['phone','phoneLink','email','instagram','instagramUrl'].forEach(k => {
+        const el = document.getElementById('contact-' + k);
+        if (el) { if (!siteData.contact) siteData.contact = {}; siteData.contact[k] = el.value; }
+      });
+      // Video
+      ['youtubeId','posterImage'].forEach(k => {
+        const el = document.getElementById('video-' + k);
+        if (el) { if (!siteData.video) siteData.video = {}; siteData.video[k] = el.value; }
+      });
+      // Stats
+      ['musicians','songs','events','years'].forEach(k => {
+        const el = document.getElementById('stats-' + k);
+        if (el) { if (!siteData.stats) siteData.stats = {}; siteData.stats[k] = el.value; }
+      });
+    }
+
+    // ===================== DRAG & DROP GALLERY =====================
+    let dragIndex = null;
+
+    function initDragAndDrop() {
+      const grid = document.getElementById('galleryGrid');
+      if (!grid) return;
+
+      grid.querySelectorAll('.gallery-card').forEach(card => {
+        card.addEventListener('dragstart', e => {
+          dragIndex = parseInt(card.dataset.index);
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          grid.querySelectorAll('.gallery-card').forEach(c => c.classList.remove('drag-over'));
+        });
+        card.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          card.classList.add('drag-over');
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+        card.addEventListener('drop', e => {
+          e.preventDefault();
+          const dropIndex = parseInt(card.dataset.index);
+          if (dragIndex !== null && dragIndex !== dropIndex) {
+            const moved = galleryOrder.splice(dragIndex, 1)[0];
+            galleryOrder.splice(dropIndex, 0, moved);
+            renderGalleryPage();
+          }
+        });
+      });
+    }
+
+    function removeFromGallery(index) {
+      galleryOrder.splice(index, 1);
+      renderGalleryPage();
+    }
+
+    async function addFromExisting() {
+      const res = await fetch(ADMIN_BASE + '/api/images');
+      const allImages = await res.json();
+      const available = allImages.filter(img => !galleryOrder.includes(img));
+
+      if (available.length === 0) {
+        showToast('All images already in gallery');
+        return;
+      }
+
+      // Simple modal with available images
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;';
+      const modal = document.createElement('div');
+      modal.style.cssText = 'background:var(--surface);border-radius:16px;padding:24px;max-width:700px;width:90%;max-height:80vh;overflow-y:auto;';
+      modal.innerHTML = '<h3 style="margin-bottom:16px;">Select images to add</h3>' +
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">' +
+        available.map(img => `<div class="pick-img" data-src="${img}" style="aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid var(--border);transition:0.15s;">
+          <img src="/${img}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;">
+        </div>`).join('') + '</div>' +
+        '<div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">' +
+        '<button class="btn btn-outline" id="modalCancel">Cancel</button>' +
+        '<button class="btn btn-primary" id="modalAdd">Add Selected</button></div>';
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      const selected = new Set();
+      modal.querySelectorAll('.pick-img').forEach(el => {
+        el.addEventListener('click', () => {
+          const src = el.dataset.src;
+          if (selected.has(src)) { selected.delete(src); el.style.borderColor = 'var(--border)'; }
+          else { selected.add(src); el.style.borderColor = 'var(--accent)'; }
+        });
+      });
+      modal.querySelector('#modalCancel').addEventListener('click', () => overlay.remove());
+      modal.querySelector('#modalAdd').addEventListener('click', () => {
+        selected.forEach(src => galleryOrder.push(src));
+        overlay.remove();
+        renderGalleryPage();
+      });
+      overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    }
+
+    // ===================== UPLOAD =====================
+    function initUpload() {
+      const area = document.getElementById('uploadArea');
+      const input = document.getElementById('uploadInput');
+      if (!area || !input) return;
+
+      area.addEventListener('click', () => input.click());
+      area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
+      area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+      area.addEventListener('drop', e => {
+        e.preventDefault(); area.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+      });
+      input.addEventListener('change', () => handleFiles(input.files));
+    }
+
+    async function handleFiles(files) {
+      if (!files.length) return;
+      const form = new FormData();
+      Array.from(files).forEach(f => form.append('photos', f));
+
+      showToast('Uploading...');
+      const res = await fetch(ADMIN_BASE + '/api/images/upload', { method: 'POST', body: form });
+      const r = await res.json();
+      if (r.success) {
+        r.files.forEach(f => galleryOrder.push(f));
+        renderGalleryPage();
+        showToast(`${r.files.length} image(s) uploaded!`);
+      }
+    }
+
+    // ===================== UTILS =====================
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function escAttr(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+    // ===================== ADMINS PAGE =====================
+    let currentUser = null;
+
+    async function loadCurrentUser() {
+      try {
+        const res = await fetch(ADMIN_BASE + '/api/me');
+        if (res.status === 401) { window.location.replace(ADMIN_BASE); return; }
+        currentUser = await res.json();
+        document.getElementById('userInfo').textContent = currentUser.email;
+        const adminsNav = document.getElementById('adminsNav');
+        if (adminsNav && currentUser.role !== 'superadmin') adminsNav.style.display = 'none';
+      } catch (e) { /* network error, don't redirect */ }
+    }
+
+    function renderAdminsPage() {
+      const area = document.getElementById('contentArea');
+      area.innerHTML = `
+        <div class="page-title">Admin Users</div>
+        <div style="margin-bottom:20px">
+          <h3 style="font-size:14px;color:var(--muted);margin-bottom:12px">Add New Admin</h3>
+          <div class="field-row">
+            <div class="field"><label>Email</label><input type="email" id="newAdminEmail"></div>
+            <div class="field"><label>Password (min 8 chars)</label><input type="text" id="newAdminPass"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addAdmin()">Add Admin</button>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:20px">
+          <h3 style="font-size:14px;color:var(--muted);margin-bottom:12px">Current Admins</h3>
+          <div id="adminsList"></div>
+        </div>
+        <div style="border-top:1px solid var(--border);margin-top:24px;padding-top:20px">
+          <h3 style="font-size:14px;color:var(--muted);margin-bottom:12px">Change My Password</h3>
+          <div class="field"><label>Current Password</label><input type="password" id="curPass"></div>
+          <div class="field"><label>New Password (min 8 chars)</label><input type="password" id="newPass"></div>
+          <button class="btn btn-primary btn-sm" onclick="changePassword()">Update Password</button>
+        </div>
+      `;
+      loadAdminsList();
+    }
+
+    async function loadAdminsList() {
+      const res = await fetch(ADMIN_BASE + '/api/admins');
+      if (!res.ok) return;
+      const admins = await res.json();
+      const list = document.getElementById('adminsList');
+      list.innerHTML = admins.map(a => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--surface2);border-radius:8px;margin-bottom:6px">
+          <div>
+            <span style="font-weight:500">${esc(a.email)}</span>
+            <span style="color:var(--muted);font-size:12px;margin-left:8px">${a.role}</span>
+          </div>
+          ${a.id !== currentUser?.id ? `
+            <div class="dot-menu">
+              <button class="dot-menu-trigger" onclick="this.parentElement.classList.toggle('open')">&#8943;</button>
+              <div class="dot-menu-dropdown">
+                <button class="dot-menu-item danger" onclick="removeAdmin('${a.id}')">Remove admin</button>
+              </div>
+            </div>` : '<span style="color:var(--muted);font-size:12px">you</span>'}
+        </div>
+      `).join('');
+      // Close dot-menus on outside click
+      document.addEventListener('click', e => {
+        if (!e.target.closest('.dot-menu')) {
+          document.querySelectorAll('.dot-menu.open').forEach(m => m.classList.remove('open'));
+        }
+      });
+    }
+
+    async function addAdmin() {
+      const email = document.getElementById('newAdminEmail').value;
+      const password = document.getElementById('newAdminPass').value;
+      const res = await fetch(ADMIN_BASE + '/api/admins', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success) { showToast('Admin added'); loadAdminsList(); }
+      else showToast(data.error || 'Error');
+    }
+
+    async function removeAdmin(id) {
+      if (!confirm('Remove this admin?')) return;
+      const res = await fetch(ADMIN_BASE + '/api/admins/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) { showToast('Admin removed'); loadAdminsList(); }
+      else showToast(data.error || 'Error');
+    }
+
+    async function changePassword() {
+      const res = await fetch(ADMIN_BASE + '/api/change-password', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          currentPassword: document.getElementById('curPass').value,
+          newPassword: document.getElementById('newPass').value
+        })
+      });
+      const data = await res.json();
+      showToast(data.success ? 'Password updated' : (data.error || 'Error'));
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch(ADMIN_BASE + '/api/logout', { method: 'POST' });
+      window.location.href = ADMIN_BASE;
+    });
+
+    // Update render to include admins page
+    const origRender = render;
+    render = function() {
+      if (currentPage === 'admins') renderAdminsPage();
+      else origRender();
+    };
+
+    // Save button
+    document.getElementById('saveBtn').addEventListener('click', saveAll);
+
+    // Load user info, then data
+    loadCurrentUser().then(() => loadData());
+  </script>
+</body>
+</html>

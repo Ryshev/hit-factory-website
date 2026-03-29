@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Route all /hf-manage/api/* requests to api.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api.php [QSA,L]
+
+# Block direct access to data directory
+RewriteRule ^data/ - [F,L]
+
+# No indexing
+Header set X-Robots-Tag "noindex, nofollow"

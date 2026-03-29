@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Hit Factory — Login</title>
+  <style>
+    :root { --bg:#0a0a0a; --surface:#151515; --border:#2a2a2a; --text:#e5e5e5; --muted:#777; --accent:#e23a6e; --accent2:#6c3ce0; --danger:#ef4444; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:400px;margin:20px}
+    .logo{text-align:center;margin-bottom:32px;font-size:24px;font-weight:700;letter-spacing:4px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .card h2{text-align:center;font-size:18px;font-weight:500;color:var(--muted);margin-bottom:24px}
+    .field{margin-bottom:16px}
+    .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px}
+    .field input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;transition:0.2s}
+    .field input:focus{outline:none;border-color:var(--accent)}
+    .btn{width:100%;padding:14px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:0.2s;margin-top:8px}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
+    .btn-primary:hover{opacity:0.9}
+    .btn-link{background:none;color:var(--muted);font-size:13px;margin-top:12px;text-decoration:underline;cursor:pointer;border:none;display:block;text-align:center}
+    .btn-link:hover{color:var(--text)}
+    .error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+    .success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+    .back{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none;margin-bottom:16px;display:none}
+    .back:hover{color:var(--text)}
+    /* Honeypot — hidden from real users */
+    .hp-field{position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;width:0;overflow:hidden;tab-index:-1}
+    .captcha-row{display:flex;gap:10px;align-items:flex-end}
+    .captcha-row .captcha-q{font-size:14px;color:var(--muted);padding:12px 0;white-space:nowrap}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">HIT FACTORY</div>
+
+    <!-- Login form -->
+    <div id="loginView">
+      <h2>Admin Login</h2>
+      <div class="error" id="loginError"></div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" autocomplete="current-password">
+      </div>
+      <!-- Honeypot — bots fill this, humans don't see it -->
+      <div class="hp-field" aria-hidden="true">
+        <label>Website</label>
+        <input type="text" id="hpWebsite" name="website" autocomplete="off" tabindex="-1">
+      </div>
+      <!-- Simple math CAPTCHA -->
+      <div class="field">
+        <label id="captchaLabel">Verify</label>
+        <div class="captcha-row">
+          <span class="captcha-q" id="captchaQ"></span>
+          <input type="text" id="captchaAnswer" style="width:80px" autocomplete="off" inputmode="numeric">
+        </div>
+      </div>
+      <button class="btn btn-primary" id="loginBtn">Sign In</button>
+      <button class="btn-link" id="showForgot">Forgot password?</button>
+    </div>
+
+    <!-- Forgot password -->
+    <div id="forgotView" style="display:none">
+      <button class="back" id="backToLogin" style="display:block">&larr; Back to login</button>
+      <h2>Reset Password</h2>
+      <div class="error" id="forgotError"></div>
+      <div class="success" id="forgotSuccess"></div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="forgotEmail" autocomplete="email">
+      </div>
+      <button class="btn btn-primary" id="forgotBtn">Send Reset Link</button>
+    </div>
+
+    <!-- Reset password (when coming from email link) -->
+    <div id="resetView" style="display:none">
+      <h2>Set New Password</h2>
+      <div class="error" id="resetError"></div>
+      <div class="success" id="resetSuccess"></div>
+      <div class="field">
+        <label>New Password (min 8 characters)</label>
+        <input type="password" id="resetPass" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="resetPassConfirm" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary" id="resetBtn">Set Password</button>
+    </div>
+  </div>
+
+  <script>
+    const BASE = window.location.pathname.replace(/\/+$/, '');
+    const params = new URLSearchParams(window.location.search);
+
+    // Check if this is a password reset link
+    if (params.get('reset') && params.get('email')) {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('resetView').style.display = 'block';
+    }
+
+    // CAPTCHA generation
+    let captchaAnswer = 0;
+    function generateCaptcha() {
+      const a = Math.floor(Math.random() * 10) + 1;
+      const b = Math.floor(Math.random() * 10) + 1;
+      captchaAnswer = a + b;
+      document.getElementById('captchaQ').textContent = `${a} + ${b} =`;
+    }
+    generateCaptcha();
+
+    // Login
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPass').value;
+      const errEl = document.getElementById('loginError');
+      errEl.style.display = 'none';
+
+      // Honeypot check
+      if (document.getElementById('hpWebsite').value) return;
+
+      // CAPTCHA check
+      if (parseInt(document.getElementById('captchaAnswer').value) !== captchaAnswer) {
+        errEl.textContent = 'Incorrect CAPTCHA answer';
+        errEl.style.display = 'block';
+        generateCaptcha();
+        document.getElementById('captchaAnswer').value = '';
+        return;
+      }
+
+      try {
+        const res = await fetch(BASE + '/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = BASE + '/dashboard.html';
+        } else {
+          errEl.textContent = data.error || 'Login failed';
+          errEl.style.display = 'block';
+          generateCaptcha();
+          document.getElementById('captchaAnswer').value = '';
+        }
+      } catch (e) {
+        errEl.textContent = 'Connection error';
+        errEl.style.display = 'block';
+      }
+    });
+
+    // Enter key on captcha/password field
+    ['loginPass', 'captchaAnswer'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('loginBtn').click();
+      });
+    });
+
+    // Forgot password
+    document.getElementById('showForgot').addEventListener('click', () => {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('forgotView').style.display = 'block';
+    });
+    document.getElementById('backToLogin').addEventListener('click', () => {
+      document.getElementById('forgotView').style.display = 'none';
+      document.getElementById('loginView').style.display = 'block';
+    });
+
+    document.getElementById('forgotBtn').addEventListener('click', async () => {
+      const email = document.getElementById('forgotEmail').value;
+      const errEl = document.getElementById('forgotError');
+      const okEl = document.getElementById('forgotSuccess');
+      errEl.style.display = 'none';
+
+      const res = await fetch(BASE + '/api/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.success) {
+        okEl.textContent = 'If this email is registered, a reset link has been sent.';
+        okEl.style.display = 'block';
+      } else {
+        errEl.textContent = data.error;
+        errEl.style.display = 'block';
+      }
+    });
+
+    // Reset password
+    document.getElementById('resetBtn').addEventListener('click', async () => {
+      const newPassword = document.getElementById('resetPass').value;
+      const confirm = document.getElementById('resetPassConfirm').value;
+      const errEl = document.getElementById('resetError');
+      const okEl = document.getElementById('resetSuccess');
+      errEl.style.display = 'none';
+
+      if (newPassword !== confirm) {
+        errEl.textContent = 'Passwords do not match';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const res = await fetch(BASE + '/api/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: params.get('email'),
+          token: params.get('reset'),
+          newPassword
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        okEl.textContent = 'Password updated! Redirecting to login...';
+        okEl.style.display = 'block';
+        setTimeout(() => { window.location.href = BASE; }, 2000);
+      } else {
+        errEl.textContent = data.error;
+        errEl.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
