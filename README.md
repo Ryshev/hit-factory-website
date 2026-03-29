@@ -368,6 +368,7 @@ ErrorDocument 404 /404.html
 - Gzip compression + cache headers via .htaccess
 - No JavaScript frameworks (~6KB total JS)
 - Fluid typography with `clamp()` — no layout shifts on resize
+- `overflow-wrap: break-word` globally — prevents horizontal scroll on long words (Armenian, Georgian)
 - CSS/JS cache busting via versioned query strings
 
 ## GDPR / Cookie Consent

@@ -231,6 +231,18 @@ letter-spacing: clamp(4px, 1.5vw, 12px); /* Adapts with screen */
 padding: 0 clamp(16px, 4vw, 24px);       /* Container padding */
 ```
 
+### Multilingual text overflow prevention
+
+```css
+body {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+```
+
+Languages like Armenian and Georgian have long words that can overflow containers on mobile. `break-word` forces wrapping. Applied globally — safe for all languages (only breaks words that would overflow).
+
 ### Animated gradient text
 
 ```css
