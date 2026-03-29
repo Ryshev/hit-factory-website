@@ -6,17 +6,19 @@ Website for **Hit Factory**, a premium cover band fronted by the ex-guitarist of
 
 ## Features
 
-- **Single-page design** — Hero, About (with embedded video), Gallery, Contact
+- **Single-page design** — Hero, About (with embedded YouTube video), Gallery, Contact
 - **Dark theme** with neon gradient accents (pink, purple, blue)
-- **6 languages** — EN, RU, UK, KA, HY, KK with URL-based locales (`/ru/`, `/uk/`, etc.)
-- **SEO-optimized locales** — each language has its own static HTML with hreflang, canonical, OG tags
-- **Auto language detection** — redirects by browser Accept-Language header via .htaccess
-- **Lazy-loaded YouTube** embed (lite-youtube facade — zero KB until click)
-- **Photo gallery** with lightbox (keyboard navigation: arrows + Esc)
+- **6 languages** with country-code URL slugs: `/ru/`, `/ua/`, `/ge/`, `/am/`, `/kz/`
+- **SEO-optimized locales** — static HTML per language with hreflang, canonical, OG tags
+- **Dynamic content** — admin edits (text + gallery) reflect on frontend instantly via `content.json`
+- **Auto language detection** — .htaccess redirects by browser Accept-Language
+- **Lazy-loaded YouTube** (lite-youtube facade — zero KB until click, pauses on tab switch)
+- **Adaptive gallery** — CSS auto-fill grid adapts to any number of photos
+- **Photo gallery** with lightbox (keyboard: arrows + Esc)
 - **Scroll reveal** animations via IntersectionObserver
-- **Responsive** — mobile hamburger menu, adaptive gallery grid
+- **Responsive** — mobile hamburger menu, closes on outside click
 - **SEO** — meta tags, Open Graph, Twitter Cards, JSON-LD, robots.txt, sitemap.xml
-- **PHP admin panel** — protected by auth, works on shared hosting
+- **PHP admin panel** — works on shared hosting, no Node.js/database needed
 
 ## Tech Stack
 
@@ -25,8 +27,9 @@ Website for **Hit Factory**, a premium cover band fronted by the ex-guitarist of
 | Frontend | HTML5, CSS3 (custom properties, grid, flexbox), vanilla JS |
 | Fonts | Oswald (Latin + Cyrillic), Noto Sans Georgian, Noto Sans Armenian |
 | Images | AVIF format, optimized from HEIC/DNG originals |
-| Admin backend | PHP 8.x (runs on shared hosting, no Node.js needed) |
+| Admin backend | PHP 8.x (shared hosting compatible) |
 | Auth | HMAC-signed cookies, bcrypt passwords, rate limiting |
+| Build | Node.js scripts (locale generation, image conversion) |
 | Hosting | Namecheap shared hosting (cPanel) |
 | SSL | Let's Encrypt via acme.sh (auto-renewal via cron) |
 | Deployment | SSH + SCP |
@@ -34,40 +37,54 @@ Website for **Hit Factory**, a premium cover band fronted by the ex-guitarist of
 ## Project Structure
 
 ```
-site/                           # Production site root (→ public_html)
+site/                           # Production site (→ public_html on server)
 ├── index.html                  # English (root locale)
-├── ru/index.html               # Russian locale
-├── uk/index.html               # Ukrainian locale
-├── ka/index.html               # Georgian locale
-├── hy/index.html               # Armenian locale
-├── kk/index.html               # Kazakh locale
+├── ru/index.html               # Russian
+├── ua/index.html               # Ukrainian
+├── ge/index.html               # Georgian
+├── am/index.html               # Armenian
+├── kz/index.html               # Kazakh
 ├── css/styles.css              # All styles
 ├── js/
-│   ├── main.js                 # Lightbox, scroll reveal, YouTube, nav
-│   └── i18n.js                 # Translation strings (source of truth)
+│   ├── main.js                 # Lightbox, scroll reveal, YouTube, dynamic content
+│   └── i18n.js                 # Translation strings (source of truth for build)
 ├── images/                     # Optimized AVIF photos + OG image
-├── favicon.svg                 # SVG favicon (HF gradient)
+├── data/
+│   └── content.json            # Dynamic content (written by admin, read by frontend)
+├── favicon.svg                 # SVG favicon
 ├── robots.txt                  # Search engine directives
-├── sitemap.xml                 # Sitemap with all locale URLs
-├── .htaccess                   # HTTPS redirect, language detection, caching, gzip
+├── sitemap.xml                 # All locale URLs
+├── .htaccess                   # HTTPS, language detection, old slug redirects, caching
 ├── hf-manage/                  # PHP admin panel
 │   ├── index.html              # Login page (CAPTCHA + honeypot)
 │   ├── dashboard.html          # Admin dashboard SPA
 │   ├── api.php                 # REST API (auth, data, images)
 │   ├── config.php              # Configuration (secrets, paths)
 │   ├── .htaccess               # API routing, data protection
-│   └── data/                   # JSON storage (git-ignored)
-│       ├── users.json          # Admin users (hashed passwords)
-│       ├── site-data.json      # Site content data
-│       └── .htaccess           # Deny all access
+│   └── data/                   # JSON storage (users, site data, default translations)
 └── admin/                      # Legacy Node.js admin (local dev only)
 
-admin-server.js                 # Node.js admin server (local development)
-build-locales.js                # Static page generator for all locales
-.env                            # Environment config (git-ignored)
-.env.example                    # Environment template
-Mediafiles/                     # Original media files (git-ignored)
+build-locales.js                # Generates static HTML per locale from i18n.js
+admin-server.js                 # Node.js admin server (local development only)
+.env / .env.example             # Environment config (git-ignored / template)
+Mediafiles/                     # Original HEIC/DNG/video files (git-ignored)
 ```
+
+## Content Architecture
+
+```
+i18n.js (translations)
+    ↓ build-locales.js
+Static HTML per locale (/ru/, /ua/, /ge/, etc.)
+    ↓ served to browser
+Frontend JS loads /data/content.json
+    ↓ overrides static text with admin edits
+User sees latest content
+```
+
+- **Static HTML** contains base translations (good for SEO, works without JS)
+- **content.json** contains admin-edited content (text + gallery), loaded by JS on page load
+- When admin saves → PHP writes `content.json` → frontend picks it up immediately
 
 ## Quick Start
 
@@ -84,19 +101,20 @@ node admin-server.js            # Local admin panel (Node.js)
 After editing translations in `site/js/i18n.js`:
 
 ```bash
-node build-locales.js           # Generates /ru/, /uk/, /ka/, /hy/, /kk/
+node build-locales.js
 ```
 
 ### Deploy to production
 
 ```bash
-# Deploy all site files
+# Full deploy
 scp -r site/* hitfactory:~/public_html/
 
-# Or deploy specific changes
+# Specific files
 scp site/index.html hitfactory:~/public_html/
 scp site/css/styles.css hitfactory:~/public_html/css/
-scp -r site/ru site/uk site/ka site/hy site/kk hitfactory:~/public_html/
+scp site/js/main.js hitfactory:~/public_html/js/
+scp -r site/ru site/ua site/ge site/am site/kz hitfactory:~/public_html/
 ```
 
 SSH config (`~/.ssh/config`):
@@ -112,53 +130,79 @@ Host hitfactory
 
 **URL:** https://hitfactory.band/hf-manage/
 
-### Features
-- Edit translations for all 6 languages (tabbed by section)
-- SEO settings: title, description, keywords, canonical, OG image (visual upload)
-- Gallery: drag-and-drop reorder, upload, delete, add from existing
-- Settings: contacts, YouTube video ID, statistics
-- Admin users: add/remove (superadmin only), change password
-- Password reset via email or server log
+### What you can edit (changes appear on site immediately)
 
-### Architecture
-- Pure PHP backend — works on any shared hosting with PHP 8.x
-- No database — JSON file storage
-- HMAC-signed httpOnly cookies for sessions (4h expiry)
+- **Translations** — all text on all 6 languages (tabbed by section: Hero, About, Nav, Gallery, Contact, Footer)
+- **SEO** — page title, meta description per language; keywords, canonical, OG image (shared)
+- **Gallery** — drag-and-drop reorder, upload new photos, delete, add from existing
+- **Settings** — contacts, YouTube video ID, statistics
+- **Admins** — add/remove users (superadmin only), change password, password reset
+
+### How edits work
+
+1. Edit text/gallery in admin → click **Save All**
+2. PHP writes `/data/content.json` (public file)
+3. Frontend JS loads `content.json` on page load → overrides static HTML
+4. Changes visible immediately — no rebuild needed
+
+### First login
+
+On first access, initial admin account is created. Password saved to:
+`hf-manage/data/initial_password.txt`
+
+### Security
+
+- HMAC-signed httpOnly cookies (4h expiry, strict SameSite)
 - bcrypt password hashing (cost 12)
 - File-based rate limiting (10 req / 15 min on auth endpoints)
 - Honeypot + math CAPTCHA on login
-- .htaccess protects data directory from direct access
-
-### First Login
-On first access, an initial admin account is created. Password is saved to:
-`hf-manage/data/initial_password.txt`
+- .htaccess blocks data directory
+- noindex/nofollow on admin pages
 
 ## Locale System
 
-### How it works
-1. **Source of truth:** `site/js/i18n.js` contains all translations
-2. **Build step:** `node build-locales.js` generates static HTML for each language
-3. **Each locale page** has translated text baked into HTML (no JS needed for content)
-4. **Language switcher** uses `<a>` links to locale URLs (not JS switching)
-5. **.htaccess** auto-redirects root `/` based on browser Accept-Language
-
 ### URL structure
-| Language | URL | hreflang |
-|----------|-----|----------|
-| English (default) | `/` | `en` |
-| Russian | `/ru/` | `ru` |
-| Ukrainian | `/uk/` | `uk` |
-| Georgian | `/ka/` | `ka` |
-| Armenian | `/hy/` | `hy` |
-| Kazakh | `/kk/` | `kk` |
+
+| Language | URL Slug | hreflang | Label |
+|----------|----------|----------|-------|
+| English | `/` (root) | `en` | EN |
+| Russian | `/ru/` | `ru` | RU |
+| Ukrainian | `/ua/` | `uk` | UA |
+| Georgian | `/ge/` | `ka` | GE |
+| Armenian | `/am/` | `hy` | AM |
+| Kazakh | `/kz/` | `kk` | KZ |
+
+### How locales work
+
+1. **i18n.js** — single source of all translation strings
+2. **build-locales.js** — generates static HTML per locale with:
+   - Translated `data-i18n` elements baked into HTML
+   - Correct `<html lang>`, canonical, og:url, og:locale, og:title, og:description
+   - hreflang tags linking all versions
+   - Absolute asset paths for subdirectory pages
+   - Active language highlighted in switcher
+3. **content.json** — admin-edited translations override static HTML via JS
+4. **.htaccess** — auto-detects browser language, 301 redirects old slugs
+
+### Old slug redirects
+
+```
+/uk/ → /ua/ (301)
+/ka/ → /ge/ (301)
+/hy/ → /am/ (301)
+/kk/ → /kz/ (301)
+```
 
 ### Adding a new language
+
 1. Add translation object in `site/js/i18n.js`
-2. Add `<a>` button in the `nav-lang` div in `site/index.html`
-3. Add font imports if needed (non-Latin scripts)
-4. Run `node build-locales.js`
-5. Update `site/sitemap.xml`
-6. Deploy
+2. Add slug mapping in `build-locales.js` (`SLUG_MAP`)
+3. Add `<a>` button in nav-lang div in `site/index.html`
+4. Add font imports if needed (non-Latin scripts)
+5. Run `node build-locales.js`
+6. Update `site/sitemap.xml` and `.htaccess`
+7. Export translations JSON: run the node export script
+8. Deploy
 
 ## Image Pipeline
 
@@ -174,23 +218,28 @@ node optimize-images.js   # Resize to 1920px max, AVIF q80
 | Web-ready | AVIF (q80, 1920px max) | ~350 KB |
 | OG Image | JPEG (1200×630) | ~140 KB |
 
+## YouTube Video
+
+Lite-youtube facade pattern — no iframe loaded until user clicks play.
+
+- Pauses automatically when tab is switched (visibilitychange API)
+- Pauses when scrolled out of viewport (IntersectionObserver)
+- Uses `youtube-nocookie.com` for privacy
+- Video ID configurable in admin → Settings → Video
+
 ## SSL
 
-Let's Encrypt certificate installed via acme.sh:
-- Auto-renewal via cron (daily check)
+Let's Encrypt via acme.sh:
+- Auto-renewal via cron (daily check at 8:54)
 - Deployed to cPanel via `cpanel_uapi` hook
 - Covers `hitfactory.band` + `www.hitfactory.band`
 
-## Security
+## Contacts
 
-- HMAC-signed session cookies (httpOnly, strict SameSite, secure in production)
-- bcrypt password hashing (cost 12)
-- Rate limiting on auth endpoints
-- Honeypot + CAPTCHA on login
-- .htaccess blocks data directory access
-- noindex/nofollow on admin pages
-- Path traversal protection on file operations
-- Admin URL obfuscation (`/hf-manage/` not `/admin/`)
+Configured in HTML and editable via admin:
+- Two phone numbers with Telegram/WhatsApp icons (decorative)
+- Email
+- Instagram
 
 ## License
 

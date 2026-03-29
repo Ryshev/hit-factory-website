@@ -1,307 +1,222 @@
 # Architecture Guide — Static Multilingual Site with PHP Admin
 
-This document describes the architecture patterns used in this project.
-Designed for reuse in similar projects: band sites, portfolio sites, landing pages.
+Reusable patterns from this project: static multilingual site with dynamic admin on shared hosting.
 
 ## Overview
-
-A fully static, SEO-optimized multilingual site with a PHP admin panel that works on any shared hosting (no Node.js, no database, no frameworks).
 
 ```
 ┌─────────────┐    ┌──────────────┐    ┌────────────────┐
 │  i18n.js    │───►│ build-locales│───►│  /ru/index.html │
-│ (translations)│  │    .js       │    │  /uk/index.html │
-│             │    │              │    │  /ka/index.html │
-│             │    │              │    │       ...       │
-└─────────────┘    └──────────────┘    └────────────────┘
-                                              │
-                                              ▼
-                                       ┌────────────┐
-                                       │  Hosting    │
-                                       │ public_html │
-                                       └────────────┘
-                                              │
-                          ┌───────────────────┼───────────────┐
-                          ▼                   ▼               ▼
-                   ┌────────────┐    ┌──────────────┐  ┌───────────┐
-                   │ Static site │   │ PHP Admin API │  │ .htaccess │
-                   │  HTML/CSS/JS│   │  /hf-manage/  │  │ redirects │
-                   └────────────┘    └──────────────┘  └───────────┘
+│(translations)│   │    .js       │    │  /ua/index.html │
+└─────────────┘    └──────────────┘    │  /ge/index.html │
+                                       └───────┬────────┘
+                                               │
+                   ┌──────────────┐    ┌───────▼────────┐
+                   │  PHP Admin   │───►│ content.json   │
+                   │  /hf-manage/ │    │ (public file)  │
+                   └──────────────┘    └───────┬────────┘
+                                               │
+                                       ┌───────▼────────┐
+                                       │  Frontend JS   │
+                                       │ overrides HTML  │
+                                       └────────────────┘
 ```
+
+Two-layer content system:
+1. **Static HTML** (from build) — base content, SEO-friendly, works without JS
+2. **Dynamic JSON** (from admin) — overrides static content via JS on page load
 
 ## 1. Multilingual System
 
-### Philosophy
-- Translations stored in a single JS file (`i18n.js`)
-- A build script generates static HTML for each locale
-- Each locale gets its own URL (`/ru/`, `/ka/`, etc.)
-- No client-side rendering of translations — content is in HTML
+### URL slugs: country codes, not language codes
 
-### Why static HTML per locale?
-- Google indexes each language as a separate page
-- No JavaScript needed to display content
-- Faster load times (no translation lookup at runtime)
-- Proper hreflang tags for SEO
-
-### i18n.js structure
 ```javascript
-const translations = {
-  en: {
-    'nav.home': 'Home',
-    'hero.title': 'Welcome',
-    // ...
-  },
-  ru: {
-    'nav.home': 'Главная',
-    'hero.title': 'Добро пожаловать',
-    // ...
-  }
-};
+// build-locales.js
+const SLUG_MAP = { en: 'en', ru: 'ru', uk: 'ua', ka: 'ge', hy: 'am', kk: 'kz' };
 ```
+
+hreflang uses ISO language codes (required by Google), URL slugs use country codes (user-friendly).
 
 ### Build script pattern
+
 ```javascript
-// 1. Read template (index.html)
-// 2. Load translations from i18n.js
-// 3. For each language:
-//    a. Replace data-i18n elements with translated text
-//    b. Set correct <html lang="">
-//    c. Update canonical, og:url, og:locale
-//    d. Fix asset paths (absolute for subdirectories)
-//    e. Insert hreflang tags
-//    f. Set active language in switcher
-//    g. Write to /{lang}/index.html
+// For each language:
+// 1. Replace data-i18n elements with translated text
+// 2. Set <html lang>, canonical, og:url, og:locale
+// 3. Fix asset paths (absolute for subdirectory pages)
+// 4. Insert hreflang tags
+// 5. Set active language in nav switcher
+// 6. Write to /{slug}/index.html
 ```
 
-### Asset paths
-- Root locale (`/`): relative paths (`css/styles.css`)
-- Subdirectory locales (`/ru/`): absolute paths (`/css/styles.css`)
-- The build script converts relative → absolute for non-root locales
+### i18n.js role
 
-### Language detection (.htaccess)
-```apache
-# Auto-redirect root based on browser language
-RewriteCond %{REQUEST_URI} ^/$
-RewriteCond %{HTTP:Accept-Language} ^ru [NC]
-RewriteRule ^$ /ru/ [R=302,L]
-```
-Uses 302 (not 301) so Google indexes all versions.
+- **Build time**: source of translations for static HTML generation
+- **Runtime**: NOT used to overwrite text (static HTML already translated)
+- Only sets font classes for non-Latin scripts (Georgian, Armenian)
+
+### content.json role
+
+- Written by PHP admin on save
+- Read by frontend JS on page load
+- Overrides `data-i18n` elements with admin-edited text
+- Contains: gallery list, translations, stats, contacts, video config
+
+### Why this two-layer approach?
+
+- SEO crawlers see translated text in HTML (no JS needed)
+- Admin edits appear instantly without rebuild
+- Site works even if JS fails (graceful degradation)
+- No server-side rendering needed
 
 ## 2. PHP Admin Panel
 
-### Design principles
-- No database — JSON files for storage
-- No framework — single `api.php` handles all routes
-- Works on any shared hosting with PHP 8.x
-- Admin is a separate SPA that talks to REST API
+### No database, no framework
 
-### File structure
 ```
 hf-manage/
-├── index.html          # Login page
-├── dashboard.html      # Admin SPA (fetches data via API)
-├── api.php             # All REST endpoints
+├── index.html          # Login (honeypot + math CAPTCHA)
+├── dashboard.html      # SPA dashboard
+├── api.php             # All REST endpoints (single file router)
 ├── config.php          # Secrets, paths
-├── .htaccess           # Route /api/* to api.php
+├── .htaccess           # Route /api/* to api.php, block /data/
 └── data/
-    ├── .htaccess       # Deny from all
-    ├── users.json      # Admin users
-    └── site-data.json  # Site content
+    ├── users.json              # Admin accounts (bcrypt hashed)
+    ├── site-data.json          # Full admin data
+    ├── translations-default.json # Exported from i18n.js for initial load
+    └── .htaccess               # Deny from all
 ```
 
-### Authentication flow
-```
-Login form → POST /api/login → Verify bcrypt password
-  → Create HMAC-signed token → Set httpOnly cookie
-  → Redirect to dashboard.html
+### Authentication
 
-Dashboard → GET /api/me → Verify cookie token
-  → If expired → Redirect to login
-  → If valid → Load dashboard, fetch /api/data
+```
+HMAC-SHA256 signed cookie token (not JWT library — just hash_hmac)
+Token = base64(payload) + "." + HMAC(payload, secret)
+4-hour expiry, httpOnly, SameSite=Strict
 ```
 
-### Token format
-```
-base64(JSON payload) + "." + HMAC-SHA256(payload, secret)
-```
-No external JWT library needed. PHP's `hash_hmac()` does the job.
+### Public content endpoint
 
-### Rate limiting (file-based)
-```php
-// Store attempt timestamps in JSON file per IP+action
-// Filter out attempts older than window
-// Block if count exceeds max
-```
+On save, PHP writes TWO files:
+1. `data/site-data.json` — full admin data (protected)
+2. `data/content.json` — public subset (gallery, translations, stats)
 
-### API routing (.htaccess)
-```apache
-RewriteRule ^api/(.*)$ api.php [QSA,L]
-```
-All `/api/*` requests go to `api.php`, which parses the path.
+Frontend only reads the public file.
 
-### Security checklist
-- [x] bcrypt passwords (cost 12)
-- [x] HMAC-signed httpOnly cookies
-- [x] SameSite=Strict
-- [x] Rate limiting on auth endpoints
-- [x] Honeypot + CAPTCHA on login
-- [x] Data directory blocked by .htaccess
-- [x] Path traversal protection (basename)
-- [x] noindex on admin pages
-- [x] HTTPS enforced via .htaccess
+### Default translations loading
 
-## 3. Image Pipeline
+On first run (no site-data.json), PHP loads `translations-default.json` which is pre-exported from `i18n.js` via Node.js:
 
-### Converting from camera formats
-```
-HEIC/DNG → PNG (lossless intermediate) → AVIF (web-ready)
+```bash
+node -e "...parse i18n.js..." > site/hf-manage/data/translations-default.json
 ```
 
-### Tools used
-- `sharp` (Node.js) — handles DNG via dcraw, AVIF encoding
-- `heic-convert` — pure JS HEIC decoder (sharp's libheif doesn't support HEIC)
+## 3. Gallery System
 
-### Optimization strategy
+### CSS: auto-fill grid
+
+```css
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: 300px;
+  gap: 8px;
+}
+```
+
+Adapts to any number of photos — no JS layout logic needed.
+
+### Dynamic loading
+
 ```javascript
-sharp(input)
-  .resize({ width: 1920, fit: 'inside', withoutEnlargement: true })
-  .avif({ quality: 80, effort: 6 })
-  .toFile(output);
+// Frontend loads gallery from content.json
+const data = await fetch('/data/content.json').then(r => r.json());
+galleryGrid.innerHTML = data.gallery.map(src =>
+  `<div class="gallery-item"><img src="/${src}">...</div>`
+).join('');
 ```
-- Max dimension: 1920px (sufficient for full-screen display)
-- AVIF quality 80 (visually lossless, ~350KB average)
-- OG image: JPEG 1200×630 (~140KB)
 
-## 4. Lite YouTube Embed
+### Admin gallery
 
-### Pattern
+- Drag-and-drop reorder (HTML5 Drag API)
+- Upload via drag-drop zone or file picker (multer on Node.js / move_uploaded_file on PHP)
+- Delete photos
+- Add from existing server images
+
+## 4. YouTube Embed (Lite Pattern)
+
 ```html
 <div class="lite-youtube" data-videoid="VIDEO_ID">
-  <div class="lite-youtube-poster" style="background-image: url('poster.avif')"></div>
+  <div class="lite-youtube-poster" style="background-image:url('poster.avif')"></div>
   <button class="lite-youtube-playbtn">▶</button>
 </div>
 ```
 
-### JavaScript
-```javascript
-element.addEventListener('click', () => {
-  const iframe = document.createElement('iframe');
-  iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1';
-  element.innerHTML = '';
-  element.appendChild(iframe);
-});
-```
-
-### Key details
-- Zero network requests until click (no YouTube iframe/scripts loaded)
-- Custom poster image (not YouTube thumbnail — better quality)
+Key details:
+- `pointer-events: none` on poster/button — clicks reach container div
+- `enablejsapi=1` in iframe URL — enables postMessage control
 - `youtube-nocookie.com` for privacy
-- `pointer-events: none` on poster/button so clicks reach the container
+- Pause on `visibilitychange` (tab switch)
+- Pause on `IntersectionObserver` (scroll out of viewport)
 
-## 5. Deployment
+## 5. Deployment (Shared Hosting)
 
-### SSH setup for shared hosting
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/id_project -N ""
-# Import public key via cPanel → SSH Access → Import Key
-# Import ONLY the public key, authorize it
+### SSH on Namecheap
+
 ```
-
-SSH config:
-```
-Host projectname
-    HostName IP_ADDRESS
-    User cpanel_username
-    IdentityFile ~/.ssh/id_project
-    Port 21098        # Namecheap default SSH port
-```
-
-### Deploy command
-```bash
-scp -r site/* projectname:~/public_html/
+Port: 21098 (not 22)
+SSH Access must be enabled in cPanel
+Import public key via cPanel → SSH Access → Import Key → Authorize
 ```
 
 ### SSL via acme.sh
-```bash
-# Install
-curl https://get.acme.sh | sh
 
-# Set Let's Encrypt as default CA
+```bash
 ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 ~/.acme.sh/acme.sh --register-account -m email@example.com
-
-# Issue certificate
-~/.acme.sh/acme.sh --issue -d example.com -d www.example.com --webroot ~/public_html
-
-# Deploy to cPanel
-~/.acme.sh/acme.sh --deploy -d example.com --deploy-hook cpanel_uapi
+~/.acme.sh/acme.sh --issue -d domain.com --webroot ~/public_html
+~/.acme.sh/acme.sh --deploy -d domain.com --deploy-hook cpanel_uapi
+# Auto-renewal via cron — set up automatically
 ```
-Auto-renewal is set up via cron automatically.
 
-## 6. .htaccess Essentials
+### .htaccess essentials
 
 ```apache
-# HTTPS redirect
+# HTTPS
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
-# Language auto-detection (302 not 301!)
+# Old slug redirects (301 for SEO)
+RewriteRule ^uk/(.*)$ /ua/$1 [R=301,L]
+
+# Language detection (302 — don't cache)
 RewriteCond %{REQUEST_URI} ^/$
 RewriteCond %{HTTP:Accept-Language} ^ru [NC]
 RewriteRule ^$ /ru/ [R=302,L]
 
-# Block sensitive directories
-RewriteRule ^admin/data/ - [F,L]
-
-# Cache static assets
+# Caching + compression
 ExpiresByType image/avif "access plus 1 year"
-ExpiresByType text/css "access plus 1 month"
-
-# Gzip compression
 AddOutputFilterByType DEFLATE text/html text/css application/javascript
 ```
 
-## 7. Gallery with Lightbox
+## 6. Performance
 
-### CSS auto-fill grid
-```css
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  grid-auto-rows: 300px;
-  grid-auto-flow: dense;  /* Fill gaps automatically */
-  gap: 8px;
-}
-```
-This adapts to any number of photos without manual layout adjustment.
+- AVIF images (5-10x smaller than JPEG)
+- Lazy loading (`loading="lazy"`)
+- YouTube facade (zero KB until click)
+- Google Fonts with `display=swap`
+- Gzip compression + cache headers
+- No JavaScript frameworks (~5KB total JS)
 
-### Lightbox
-Pure JS, no dependencies:
-- Click image → show fullscreen overlay
-- Keyboard: Escape to close, arrows to navigate
-- Click outside image to close
+## 7. Reuse Checklist
 
-## 8. Performance Checklist
-
-- [x] AVIF images (5-10x smaller than JPEG)
-- [x] Lazy loading on below-fold images (`loading="lazy"`)
-- [x] YouTube facade (no iframe until click)
-- [x] Google Fonts with `display=swap`
-- [x] CSS/JS minification (manual, no build tool)
-- [x] Gzip compression via .htaccess
-- [x] Cache headers for static assets
-- [x] No JavaScript frameworks (vanilla JS, ~5KB total)
-
-## Reuse Checklist
-
-To create a similar site for another project:
-
-1. **Fork/copy** this repository
-2. **Replace** images in `site/images/`
-3. **Edit** translations in `site/js/i18n.js`
-4. **Update** `site/index.html` — sections, content, contact info
-5. **Update** `site/hf-manage/config.php` — secrets, admin email
-6. **Run** `node build-locales.js` to generate locale pages
-7. **Update** `site/sitemap.xml` with correct domain
-8. **Deploy** to hosting via SCP
-9. **Install SSL** via acme.sh
+1. Fork repository
+2. Replace images in `site/images/`
+3. Edit translations in `site/js/i18n.js`
+4. Update `site/index.html` — sections, contacts
+5. Update `site/hf-manage/config.php` — secrets, admin email
+6. Update `SLUG_MAP` in `build-locales.js` if different locales
+7. Run `node build-locales.js`
+8. Export translations: `node -e "..." > translations-default.json`
+9. Update `sitemap.xml` with correct domain
+10. Deploy via SCP, install SSL via acme.sh
