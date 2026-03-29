@@ -199,22 +199,46 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* ===== VARIANT 6: Solid gradient + dark HF ===== */
+    /* ===== VARIANT 6: Full name + triple gradient ===== */
     .v6 {
       width: 400px;
       height: 400px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0, #00b4ff);
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .v6-text {
+    .v6-inner {
+      width: 370px;
+      height: 370px;
+      border-radius: 50%;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .v6-hit {
       font-family: 'Oswald', sans-serif;
       font-weight: 700;
-      font-size: 120px;
-      letter-spacing: 6px;
-      color: #0a0a0a;
+      font-size: 72px;
+      letter-spacing: 12px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0, #00b4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    .v6-factory {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      letter-spacing: 18px;
+      text-transform: uppercase;
+      color: #999;
+      line-height: 1;
     }
 
     /* Export helper */
@@ -306,10 +330,13 @@
 
     <!-- Variant 6 -->
     <div class="variant">
-      <div class="variant-label">6 — Inverted</div>
+      <div class="variant-label">6 — Full Name + Triple Gradient</div>
       <div class="logo-wrap">
         <div class="v6">
-          <span class="v6-text">HF</span>
+          <div class="v6-inner">
+            <span class="v6-hit">HIT</span>
+            <span class="v6-factory">FACTORY</span>
+          </div>
         </div>
       </div>
     </div>
