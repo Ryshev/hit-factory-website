@@ -17,11 +17,16 @@ const translations = new Function('return ' + match[1].replace(/;$/, ''))();
 const LANGS = Object.keys(translations);
 const BASE_URL = 'https://hitfactory.band';
 
+// Map language code to URL slug (country-based)
+const SLUG_MAP = { en: 'en', ru: 'ru', uk: 'ua', ka: 'ge', hy: 'am', kk: 'kz' };
+function langToSlug(lang) { return SLUG_MAP[lang] || lang; }
+
 // Build hreflang tags for all languages
 function buildHreflangTags() {
   let tags = '';
   LANGS.forEach(lang => {
-    const href = lang === 'en' ? `${BASE_URL}/` : `${BASE_URL}/${lang}/`;
+    const slug = langToSlug(lang);
+    const href = lang === 'en' ? `${BASE_URL}/` : `${BASE_URL}/${slug}/`;
     tags += `  <link rel="alternate" hreflang="${lang}" href="${href}">\n`;
   });
   tags += `  <link rel="alternate" hreflang="x-default" href="${BASE_URL}/">`;
@@ -52,7 +57,8 @@ function applyTranslations(html, lang) {
   }
 
   // Update canonical URL
-  const canonical = lang === 'en' ? `${BASE_URL}/` : `${BASE_URL}/${lang}/`;
+  const slug = langToSlug(lang);
+  const canonical = lang === 'en' ? `${BASE_URL}/` : `${BASE_URL}/${slug}/`;
   html = html.replace(
     /<link rel="canonical" href="[^"]*">/,
     `<link rel="canonical" href="${canonical}">`
@@ -153,18 +159,17 @@ LANGS.forEach(lang => {
   html = applyTranslations(html, lang);
   html = prepareForLocale(html, lang);
 
+  const slug = langToSlug(lang);
   if (lang === 'en') {
-    // Root — overwrite index.html
     const outPath = path.join(SITE_DIR, 'index.html');
     fs.writeFileSync(outPath, html, 'utf8');
     console.log(`  ${lang} -> /index.html`);
   } else {
-    // Subdirectory
-    const dir = path.join(SITE_DIR, lang);
+    const dir = path.join(SITE_DIR, slug);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const outPath = path.join(dir, 'index.html');
     fs.writeFileSync(outPath, html, 'utf8');
-    console.log(`  ${lang} -> /${lang}/index.html`);
+    console.log(`  ${lang} -> /${slug}/index.html`);
   }
 });
 

@@ -4,8 +4,13 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
+# Redirect old locale slugs to new ones
+RewriteRule ^uk/(.*)$ /ua/$1 [R=301,L]
+RewriteRule ^ka/(.*)$ /ge/$1 [R=301,L]
+RewriteRule ^hy/(.*)$ /am/$1 [R=301,L]
+RewriteRule ^kk/(.*)$ /kz/$1 [R=301,L]
+
 # Auto-detect language from Accept-Language header (only for root /)
-# Only redirect if no locale cookie is set (user hasn't chosen manually)
 RewriteCond %{REQUEST_URI} ^/$
 RewriteCond %{HTTP:Accept-Language} ^ru [NC]
 RewriteCond %{HTTP_COOKIE} !hf-locale=
@@ -14,22 +19,22 @@ RewriteRule ^$ /ru/ [R=302,L]
 RewriteCond %{REQUEST_URI} ^/$
 RewriteCond %{HTTP:Accept-Language} ^uk [NC]
 RewriteCond %{HTTP_COOKIE} !hf-locale=
-RewriteRule ^$ /uk/ [R=302,L]
+RewriteRule ^$ /ua/ [R=302,L]
 
 RewriteCond %{REQUEST_URI} ^/$
 RewriteCond %{HTTP:Accept-Language} ^ka [NC]
 RewriteCond %{HTTP_COOKIE} !hf-locale=
-RewriteRule ^$ /ka/ [R=302,L]
+RewriteRule ^$ /ge/ [R=302,L]
 
 RewriteCond %{REQUEST_URI} ^/$
 RewriteCond %{HTTP:Accept-Language} ^hy [NC]
 RewriteCond %{HTTP_COOKIE} !hf-locale=
-RewriteRule ^$ /hy/ [R=302,L]
+RewriteRule ^$ /am/ [R=302,L]
 
 RewriteCond %{REQUEST_URI} ^/$
 RewriteCond %{HTTP:Accept-Language} ^kk [NC]
 RewriteCond %{HTTP_COOKIE} !hf-locale=
-RewriteRule ^$ /kk/ [R=302,L]
+RewriteRule ^$ /kz/ [R=302,L]
 
 # Security: block admin data files
 RewriteRule ^admin/data/ - [F,L]
