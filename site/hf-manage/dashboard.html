@@ -250,12 +250,15 @@
       const sectionKeys = Object.keys(SECTIONS);
       sectionKeys.push('SEO');
 
+      function slugify(s) { return s.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase(); }
+
       sectionKeys.forEach((sec, i) => {
         const active = i === 0 ? ' active' : '';
-        tabsHtml += `<button class="tab${active}" data-tab="${sec}">${sec}</button>`;
+        const sid = slugify(sec);
+        tabsHtml += `<button class="tab${active}" data-tab="${sid}">${sec}</button>`;
 
         if (sec === 'SEO') {
-          panelsHtml += `<div class="tab-panel${active}" id="tabpanel-${sec}">${renderSeoFields()}</div>`;
+          panelsHtml += `<div class="tab-panel${active}" id="tabpanel-${sid}">${renderSeoFields()}</div>`;
         } else {
           let fields = '';
           SECTIONS[sec].forEach(key => {
@@ -267,7 +270,7 @@
                 : `<input type="text" data-lang="${lang}" data-key="${key}" value="${escAttr(val)}">`) +
               `</div>`;
           });
-          panelsHtml += `<div class="tab-panel${active}" id="tabpanel-${sec}">${fields}</div>`;
+          panelsHtml += `<div class="tab-panel${active}" id="tabpanel-${sid}">${fields}</div>`;
         }
       });
 
