@@ -168,7 +168,7 @@ function getDefaultData() {
       email: 'info@hitfactory.band',
       instagram: '@hitfactory', instagramUrl: 'https://instagram.com/hitfactory'
     },
-    video: { youtubeId: '', posterImage: 'images/band-full-pink.avif' },
+    video: { youtubeId: 'BGo9yW8Uocs', posterImage: 'images/band-full-pink.avif' },
     stats: { musicians: '5', songs: '200+', events: '100+', years: '5+' },
     gallery: [
       'images/band-full-teal.avif','images/vocalist-singing.avif','images/duo-stage.avif',

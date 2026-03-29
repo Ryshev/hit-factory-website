@@ -162,7 +162,8 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const ADMIN_BASE = window.location.pathname.replace(/\/+$/, '');
+    // Strip /dashboard suffix to get the admin base path
+    const ADMIN_BASE = window.location.pathname.replace(/\/dashboard\/?$/, '').replace(/\/+$/, '');
     const LANGS = ['en','ru','uk','ka','hy','kk'];
     const LANG_NAMES = {en:'English',ru:'Russian',uk:'Ukrainian',ka:'Georgian',hy:'Armenian',kk:'Kazakh'};
 
@@ -532,13 +533,12 @@
     async function loadCurrentUser() {
       try {
         const res = await fetch(ADMIN_BASE + '/api/me');
-        if (res.status === 401) { window.location.href = ADMIN_BASE; return; }
+        if (res.status === 401) { window.location.replace(ADMIN_BASE); return; }
         currentUser = await res.json();
         document.getElementById('userInfo').textContent = currentUser.email;
-        // Show/hide admins nav based on role
         const adminsNav = document.getElementById('adminsNav');
         if (adminsNav && currentUser.role !== 'superadmin') adminsNav.style.display = 'none';
-      } catch (e) { window.location.href = ADMIN_BASE; }
+      } catch (e) { /* network error, don't redirect */ }
     }
 
     function renderAdminsPage() {
@@ -630,16 +630,6 @@
 
     // Save button
     document.getElementById('saveBtn').addEventListener('click', saveAll);
-
-    // Auth check on 401
-    const origFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const res = await origFetch(...args);
-      if (res.status === 401 && args[0]?.includes?.('/api/')) {
-        window.location.href = ADMIN_BASE;
-      }
-      return res;
-    };
 
     // Load user info, then data
     loadCurrentUser().then(() => loadData());
