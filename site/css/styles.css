@@ -258,7 +258,7 @@ img {
 
 .hero-title-line {
   display: block;
-  font-size: clamp(48px, 16vw, 180px);
+  font-size: clamp(52px, 18vw, 180px);
   font-weight: 700;
   letter-spacing: clamp(2px, 1vw, 12px);
   color: var(--color-text);
@@ -1042,12 +1042,26 @@ img {
   }
 
   .nav-lang {
-    gap: 1px;
+    gap: 0;
     padding: 2px;
   }
 
   .lang-btn {
-    padding: 4px 6px;
-    font-size: 10px;
+    padding: 3px 4px;
+    font-size: 9px;
+  }
+
+  .nav-logo {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .nav-container {
+    padding: 0 8px;
+    gap: 6px;
+  }
+
+  .nav-toggle span {
+    width: 20px;
   }
 }
