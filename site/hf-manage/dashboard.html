@@ -206,8 +206,12 @@
 
     // ===================== DATA =====================
     async function loadData() {
-      const res = await fetch(ADMIN_BASE + '/api/data');
-      siteData = await res.json();
+      try {
+        const res = await fetch(ADMIN_BASE + '/api/data');
+        if (!res.ok) { console.error('API error:', res.status); return; }
+        siteData = await res.json();
+        if (siteData.error) { console.error('API error:', siteData.error); return; }
+      } catch (e) { console.error('Load failed:', e); return; }
       // Ensure translations exist for all langs
       if (!siteData.translations) siteData.translations = {};
       LANGS.forEach(l => { if (!siteData.translations[l]) siteData.translations[l] = {}; });

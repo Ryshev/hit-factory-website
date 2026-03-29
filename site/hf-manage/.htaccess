@@ -13,3 +13,10 @@ Header set X-Robots-Tag "noindex, nofollow"
 Header set X-Frame-Options "DENY"
 Header set X-Content-Type-Options "nosniff"
 Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+# No cache on admin pages (always fresh)
+<FilesMatch "\.(html|php)$">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires "0"
+</FilesMatch>
