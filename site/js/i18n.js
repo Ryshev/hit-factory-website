@@ -275,16 +275,14 @@ function detectLanguage() {
   return 'en';
 }
 
-// Initialize
+// Initialize — URL-based locales, don't overwrite translated HTML
 document.addEventListener('DOMContentLoaded', () => {
-  // Priority: 1) user's saved choice, 2) browser language, 3) English
-  const saved = localStorage.getItem('hf-lang');
-  const lang = saved || detectLanguage();
-  setLanguage(lang);
+  const lang = document.documentElement.lang || 'en';
 
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
-  });
+  // Set font class for non-Latin scripts
+  document.body.classList.remove('font-georgian', 'font-armenian');
+  if (lang === 'ka') document.body.classList.add('font-georgian');
+  if (lang === 'hy') document.body.classList.add('font-armenian');
 
   // Auto-generate footer year
   const yearEl = document.getElementById('footer-year');
