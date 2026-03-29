@@ -6,16 +6,15 @@ const translations = {
     'nav.gallery': 'Gallery',
     'nav.video': 'Video',
     'nav.contact': 'Contact',
-    'hero.subtitle': 'Professional Cover Band',
-    'hero.description': 'We bring the energy of live music to your event. From classic hits to modern chart-toppers — every performance is unforgettable.',
+    'hero.subtitle': 'Premium Cover Band',
+    'hero.description': 'Led by the guitarist of Gradusy — authentic live sound, hits everyone knows, and a show your guests will never forget.',
     'hero.cta': 'Book Now',
     'about.tag': 'Who We Are',
     'about.title': 'Your Event. Our Sound.',
-    'about.quote': '"Music is what feelings sound like"',
-    'about.heading1': 'The Sound of Every Generation',
-    'about.text1': 'Hit Factory is a professional cover band that transforms any event into an unforgettable experience. Our repertoire spans decades — from timeless classics to today\'s biggest hits.',
-    'about.heading2': 'Concert-Level Show',
-    'about.text2': 'Five talented musicians, state-of-the-art sound, and a spectacular light show — we deliver a concert-level performance at every event, whether it\'s a corporate party, wedding, or private celebration.',
+    'about.heading1': 'Premium Live Experience',
+    'about.text1': 'Hit Factory is a premium cover band fronted by the guitarist of Gradusy. An experienced team of musicians delivering authentic live sound and high-quality performances — from full band to trio to acoustic sets.',
+    'about.heading2': 'For Every Celebration',
+    'about.text2': 'Weddings, corporate events, private parties — we bring the hits everyone knows, performed live with energy and style. Modern sound, professional production, and an unforgettable atmosphere at every show.',
     'about.musicians': 'Musicians',
     'about.songs': 'Songs in Repertoire',
     'about.events': 'Events Performed',
@@ -44,16 +43,15 @@ const translations = {
     'nav.gallery': 'Галерея',
     'nav.video': 'Видео',
     'nav.contact': 'Контакты',
-    'hero.subtitle': 'Профессиональный Кавер Бенд',
-    'hero.description': 'Мы привносим энергию живой музыки в ваше мероприятие. От классических хитов до современных чарт-топперов — каждое выступление незабываемо.',
+    'hero.subtitle': 'Премиум Кавер Бенд',
+    'hero.description': 'Фронтмен \u2014 гитарист группы \u00ABГрадусы\u00BB. Настоящий живой звук, хиты, которые знают все, и шоу, которое ваши гости не забудут.',
     'hero.cta': 'Забронировать',
     'about.tag': 'Кто мы',
     'about.title': 'Ваше событие. Наш звук.',
-    'about.quote': '\u00ABМузыка \u2014 это то, как звучат чувства\u00BB',
-    'about.heading1': 'Звучание каждого поколения',
-    'about.text1': 'Hit Factory \u2014 профессиональный кавер-бенд, который превращает любое мероприятие в незабываемый опыт. Наш репертуар охватывает десятилетия \u2014 от вечной классики до главных хитов современности.',
-    'about.heading2': 'Шоу концертного уровня',
-    'about.text2': 'Пять талантливых музыкантов, первоклассный звук и впечатляющее световое шоу \u2014 мы обеспечиваем концертный уровень на каждом мероприятии, будь то корпоратив, свадьба или частный праздник.',
+    'about.heading1': 'Премиум живой звук',
+    'about.text1': 'Hit Factory \u2014 премиум кавер-бенд, фронтмен которого \u2014 гитарист группы \u00ABГрадусы\u00BB. Опытная команда музыкантов с настоящим живым звуком и качественным исполнением \u2014 полный состав, трио или акустическая программа.',
+    'about.heading2': 'Для любого праздника',
+    'about.text2': 'Свадьбы, корпоративы, частные мероприятия \u2014 мы привозим хиты, которые знают все, в современном и качественном исполнении. Профессиональный звук, яркое шоу и незабываемая атмосфера на каждом выступлении.',
     'about.musicians': 'Музыкантов',
     'about.songs': 'Песен в репертуаре',
     'about.events': 'Проведённых мероприятий',
@@ -82,16 +80,15 @@ const translations = {
     'nav.gallery': 'Галерея',
     'nav.video': 'В\u0456део',
     'nav.contact': 'Контакти',
-    'hero.subtitle': 'Профес\u0456йний Кавер Бенд',
-    'hero.description': 'Ми привносимо енерг\u0456ю живо\u0457 музики у вашу под\u0456ю. В\u0456д класичних х\u0456т\u0456в до сучасних чарт-топер\u0456в \u2014 кожен виступ незабутн\u0456й.',
+    'hero.subtitle': 'Прем\u0456ум Кавер Бенд',
+    'hero.description': 'Фронтмен \u2014 г\u0456тарист гурту \u00ABГрадуси\u00BB. Справжн\u0456й живий звук, х\u0456ти, як\u0456 знають ус\u0456, та шоу, яке ваш\u0456 гост\u0456 не забудуть.',
     'hero.cta': 'Забронювати',
     'about.tag': 'Хто ми',
     'about.title': 'Ваша под\u0456я. Наш звук.',
-    'about.quote': '\u00ABМузика \u2014 це те, як звучать почуття\u00BB',
-    'about.heading1': 'Звучання кожного покол\u0456ння',
-    'about.text1': 'Hit Factory \u2014 профес\u0456йний кавер-бенд, який перетворює будь-яку под\u0456ю на незабутн\u0456й досв\u0456д. Наш репертуар охоплює десятил\u0456ття \u2014 в\u0456д в\u0456чно\u0457 класики до головних х\u0456т\u0456в сучасност\u0456.',
-    'about.heading2': 'Шоу концертного р\u0456вня',
-    'about.text2': "П'ять талановитих музикант\u0456в, першокласний звук \u0456 вражаюче св\u0456тлове шоу \u2014 ми забезпечуємо концертний р\u0456вень на кожн\u0456й под\u0456\u0457, будь то корпоратив, вес\u0456лля чи приватне святкування.",
+    'about.heading1': 'Прем\u0456ум живий звук',
+    'about.text1': 'Hit Factory \u2014 прем\u0456ум кавер-бенд, фронтмен якого \u2014 г\u0456тарист гурту \u00ABГрадуси\u00BB. Досв\u0456дчена команда музикант\u0456в \u0456з справжн\u0456м живим звуком \u2014 повний склад, тр\u0456о або акустична програма.',
+    'about.heading2': 'Для будь-якого свята',
+    'about.text2': 'Вес\u0456лля, корпоративи, приватн\u0456 заходи \u2014 ми привозимо х\u0456ти, як\u0456 знають ус\u0456, у сучасному та як\u0456сному виконанн\u0456. Профес\u0456йний звук, яскраве шоу та незабутня атмосфера.',
     'about.musicians': 'Музикант\u0456в',
     'about.songs': 'П\u0456сень у репертуар\u0456',
     'about.events': 'Проведених под\u0456й',
@@ -257,12 +254,29 @@ function setLanguage(lang) {
   if (ogLocale) ogLocale.setAttribute('content', localeMap[lang] || 'en_US');
 }
 
+// Detect best language from browser settings
+function detectLanguage() {
+  const supported = Object.keys(translations);
+  const browserLangs = navigator.languages || [navigator.language || 'en'];
+  for (const bl of browserLangs) {
+    const code = bl.toLowerCase().split('-')[0];
+    if (supported.includes(code)) return code;
+  }
+  return 'en';
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('hf-lang') || 'en';
-  setLanguage(saved);
+  // Priority: 1) user's saved choice, 2) browser language, 3) English
+  const saved = localStorage.getItem('hf-lang');
+  const lang = saved || detectLanguage();
+  setLanguage(lang);
 
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
   });
+
+  // Auto-generate footer year
+  const yearEl = document.getElementById('footer-year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 });
