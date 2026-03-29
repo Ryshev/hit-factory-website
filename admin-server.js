@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 
@@ -6,6 +7,29 @@ const app = express();
 const PORT = 3000;
 const ADMIN_SLUG = 'hf-manage';
 const DATA_FILE = path.join(__dirname, 'site', 'admin', 'data', 'site-data.json');
+const IMG_DIR = path.join(__dirname, 'site', 'images');
+
+// Multer setup for image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, IMG_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const name = file.originalname
+      .replace(ext, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .toLowerCase();
+    const unique = Date.now().toString(36);
+    cb(null, `${name}-${unique}${ext}`);
+  }
+});
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const allowed = /\.(avif|jpg|jpeg|png|webp)$/i;
+    cb(null, allowed.test(path.extname(file.originalname)));
+  },
+  limits: { fileSize: 20 * 1024 * 1024 }
+});
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'site')));
@@ -49,11 +73,26 @@ function getDefaultData() {
       'images/band-full-pink.avif',
       'images/band-silhouette.avif'
     ],
-    translations: {}  // Will be populated from i18n.js defaults
+    translations: {}
   };
 }
 
-// Load data
+// Extract translations from i18n.js on first run
+function loadTranslationsFromSource() {
+  try {
+    const src = fs.readFileSync(path.join(__dirname, 'site', 'js', 'i18n.js'), 'utf8');
+    // Extract the translations object by evaluating the const assignment
+    const match = src.match(/const translations\s*=\s*(\{[\s\S]*?\n\};)/);
+    if (match) {
+      const obj = new Function('return ' + match[1].replace(/;$/, ''))();
+      return obj;
+    }
+  } catch (e) {
+    console.error('Could not parse i18n.js:', e.message);
+  }
+  return {};
+}
+
 function loadData() {
   try {
     if (fs.existsSync(DATA_FILE)) {
@@ -62,21 +101,24 @@ function loadData() {
   } catch (e) {
     console.error('Error loading data:', e.message);
   }
-  return getDefaultData();
+  // First run: populate translations from i18n.js
+  const data = getDefaultData();
+  data.translations = loadTranslationsFromSource();
+  return data;
 }
 
-// Save data
 function saveData(data) {
   const dir = path.dirname(DATA_FILE);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
-// API routes — protected under admin slug
+// API: Get site data
 app.get(`/${ADMIN_SLUG}/api/data`, (req, res) => {
   res.json(loadData());
 });
 
+// API: Save site data
 app.post(`/${ADMIN_SLUG}/api/data`, (req, res) => {
   try {
     saveData(req.body);
@@ -86,10 +128,26 @@ app.post(`/${ADMIN_SLUG}/api/data`, (req, res) => {
   }
 });
 
+// API: List images
 app.get(`/${ADMIN_SLUG}/api/images`, (req, res) => {
-  const imgDir = path.join(__dirname, 'site', 'images');
-  const files = fs.readdirSync(imgDir).filter(f => /\.(avif|jpg|png|webp)$/i.test(f));
+  const files = fs.readdirSync(IMG_DIR).filter(f => /\.(avif|jpg|jpeg|png|webp)$/i.test(f));
   res.json(files.map(f => 'images/' + f));
+});
+
+// API: Upload images
+app.post(`/${ADMIN_SLUG}/api/images/upload`, upload.array('photos', 20), (req, res) => {
+  const uploaded = req.files.map(f => 'images/' + f.filename);
+  res.json({ success: true, files: uploaded });
+});
+
+// API: Delete image
+app.delete(`/${ADMIN_SLUG}/api/images/:filename`, (req, res) => {
+  const filePath = path.join(IMG_DIR, req.params.filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  fs.unlinkSync(filePath);
+  res.json({ success: true });
 });
 
 // Serve admin page
