@@ -1,163 +1,196 @@
 # Hit Factory — Premium Cover Band Website
 
-Website for **Hit Factory**, a premium cover band fronted by the guitarist of Gradusy.
+Website for **Hit Factory**, a premium cover band fronted by the ex-guitarist of Gradusy.
+
+**Live:** https://hitfactory.band
 
 ## Features
 
-- **Single-page design** — Hero, About, Gallery, Video, Contact sections
+- **Single-page design** — Hero, About (with embedded video), Gallery, Contact
 - **Dark theme** with neon gradient accents (pink, purple, blue)
-- **6 languages** — English, Russian, Ukrainian, Georgian, Armenian, Kazakh
-- **Auto language detection** — picks browser language, user can override
-- **Lazy-loaded YouTube** embed (lite-youtube facade — no iframe until click)
+- **6 languages** — EN, RU, UK, KA, HY, KK with URL-based locales (`/ru/`, `/uk/`, etc.)
+- **SEO-optimized locales** — each language has its own static HTML with hreflang, canonical, OG tags
+- **Auto language detection** — redirects by browser Accept-Language header via .htaccess
+- **Lazy-loaded YouTube** embed (lite-youtube facade — zero KB until click)
 - **Photo gallery** with lightbox (keyboard navigation: arrows + Esc)
 - **Scroll reveal** animations via IntersectionObserver
-- **Responsive** — mobile hamburger menu, adaptive grid layouts
-- **SEO optimized** — meta tags, Open Graph, Twitter Cards, JSON-LD, robots.txt, sitemap.xml
-- **Admin panel** — protected by authentication, edit content/translations/SEO/gallery
-
-## Security
-
-- **JWT authentication** with httpOnly cookies (HS256, 4h expiry, strict SameSite)
-- **Password hashing** via bcrypt (12 rounds)
-- **Rate limiting** on login, password reset, password change (10 req / 15 min)
-- **Helmet** HTTP security headers
-- **Honeypot field** + math CAPTCHA on login form
-- **Path traversal protection** on file operations (path.basename)
-- **Admin URL obfuscation** — non-guessable slug instead of `/admin`
-- **Role-based access** — superadmin can manage other admins
-- **Password reset** via email with expiring tokens (1 hour)
-- **noindex, nofollow** on admin pages
+- **Responsive** — mobile hamburger menu, adaptive gallery grid
+- **SEO** — meta tags, Open Graph, Twitter Cards, JSON-LD, robots.txt, sitemap.xml
+- **PHP admin panel** — protected by auth, works on shared hosting
 
 ## Tech Stack
 
-- HTML5, CSS3, vanilla JavaScript (no frameworks, no build step)
-- Node.js + Express (admin server)
-- [Oswald](https://fonts.google.com/specimen/Oswald) font (Latin + Cyrillic)
-- [Noto Sans Georgian/Armenian](https://fonts.google.com/) for non-Latin scripts
-- AVIF images (optimized from HEIC/DNG originals)
-- bcryptjs, jsonwebtoken, nodemailer, helmet, express-rate-limit, multer
+| Layer | Technology |
+|-------|-----------|
+| Frontend | HTML5, CSS3 (custom properties, grid, flexbox), vanilla JS |
+| Fonts | Oswald (Latin + Cyrillic), Noto Sans Georgian, Noto Sans Armenian |
+| Images | AVIF format, optimized from HEIC/DNG originals |
+| Admin backend | PHP 8.x (runs on shared hosting, no Node.js needed) |
+| Auth | HMAC-signed cookies, bcrypt passwords, rate limiting |
+| Hosting | Namecheap shared hosting (cPanel) |
+| SSL | Let's Encrypt via acme.sh (auto-renewal via cron) |
+| Deployment | SSH + SCP |
 
 ## Project Structure
 
 ```
-site/
-  index.html              Main website
-  css/styles.css           All styles
-  js/
-    main.js                Core functionality (nav, lightbox, scroll, YouTube)
-    i18n.js                Translations for 6 languages + auto-detection
-  images/                  Optimized AVIF photos
-  robots.txt               Search engine directives
-  sitemap.xml              Sitemap with hreflang
-  admin/
-    login.html             Login page (honeypot + CAPTCHA)
-    index.html             Admin dashboard
-    data/                  JSON storage (git-ignored)
+site/                           # Production site root (→ public_html)
+├── index.html                  # English (root locale)
+├── ru/index.html               # Russian locale
+├── uk/index.html               # Ukrainian locale
+├── ka/index.html               # Georgian locale
+├── hy/index.html               # Armenian locale
+├── kk/index.html               # Kazakh locale
+├── css/styles.css              # All styles
+├── js/
+│   ├── main.js                 # Lightbox, scroll reveal, YouTube, nav
+│   └── i18n.js                 # Translation strings (source of truth)
+├── images/                     # Optimized AVIF photos + OG image
+├── favicon.svg                 # SVG favicon (HF gradient)
+├── robots.txt                  # Search engine directives
+├── sitemap.xml                 # Sitemap with all locale URLs
+├── .htaccess                   # HTTPS redirect, language detection, caching, gzip
+├── hf-manage/                  # PHP admin panel
+│   ├── index.html              # Login page (CAPTCHA + honeypot)
+│   ├── dashboard.html          # Admin dashboard SPA
+│   ├── api.php                 # REST API (auth, data, images)
+│   ├── config.php              # Configuration (secrets, paths)
+│   ├── .htaccess               # API routing, data protection
+│   └── data/                   # JSON storage (git-ignored)
+│       ├── users.json          # Admin users (hashed passwords)
+│       ├── site-data.json      # Site content data
+│       └── .htaccess           # Deny all access
+└── admin/                      # Legacy Node.js admin (local dev only)
 
-admin-server.js            Express server with auth + API
-.env                       Environment config (git-ignored)
-Mediafiles/                Original media (git-ignored)
+admin-server.js                 # Node.js admin server (local development)
+build-locales.js                # Static page generator for all locales
+.env                            # Environment config (git-ignored)
+.env.example                    # Environment template
+Mediafiles/                     # Original media files (git-ignored)
 ```
 
 ## Quick Start
 
-### 1. Configure environment
-
-```bash
-cp .env.example .env
-# Edit .env — set JWT_SECRET (required), SMTP credentials (optional)
-```
-
-### 2. Install and run
+### Local development
 
 ```bash
 npm install
-node admin-server.js
+npx http-server site -p 8080    # Preview site
+node admin-server.js            # Local admin panel (Node.js)
 ```
 
-On first run, an initial admin account is created and the password is printed to the console. **Change it immediately after first login.**
+### Build locale pages
 
-### 3. Access
+After editing translations in `site/js/i18n.js`:
 
-- **Site:** http://localhost:3000/
-- **Admin panel:** http://localhost:3000/hf-manage
-
-### 4. SMTP Configuration (for password reset emails)
-
-Set in `.env`:
-```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM=noreply@hitfactory.band
+```bash
+node build-locales.js           # Generates /ru/, /uk/, /ka/, /hy/, /kk/
 ```
 
-If SMTP is not configured, password reset links are printed to the server console.
+### Deploy to production
+
+```bash
+# Deploy all site files
+scp -r site/* hitfactory:~/public_html/
+
+# Or deploy specific changes
+scp site/index.html hitfactory:~/public_html/
+scp site/css/styles.css hitfactory:~/public_html/css/
+scp -r site/ru site/uk site/ka site/hy site/kk hitfactory:~/public_html/
+```
+
+SSH config (`~/.ssh/config`):
+```
+Host hitfactory
+    HostName 198.177.120.183
+    User hitfstmo
+    IdentityFile ~/.ssh/id_hitfactory
+    Port 21098
+```
 
 ## Admin Panel
 
-### Structure
+**URL:** https://hitfactory.band/hf-manage/
 
-The admin sidebar is organized by language. Click a language to edit all its translations, organized by tabs:
-- **Hero** — subtitle, description, CTA button text
-- **About** — headings, body text, stat labels
-- **Navigation** — menu item labels
-- **Gallery & Video** — section titles
-- **Contact** — section titles and labels
-- **Footer** — copyright text
-- **SEO** — title, description, keywords, canonical URL, OG image
+### Features
+- Edit translations for all 6 languages (tabbed by section)
+- SEO settings: title, description, keywords, canonical, OG image (visual upload)
+- Gallery: drag-and-drop reorder, upload, delete, add from existing
+- Settings: contacts, YouTube video ID, statistics
+- Admin users: add/remove (superadmin only), change password
+- Password reset via email or server log
 
-Additional pages:
-- **Gallery** — drag-and-drop reordering, upload new photos, delete, add from existing
-- **Settings** — contact info, YouTube video ID, statistics
-- **Admins** (superadmin only) — add/remove admin users, change password
+### Architecture
+- Pure PHP backend — works on any shared hosting with PHP 8.x
+- No database — JSON file storage
+- HMAC-signed httpOnly cookies for sessions (4h expiry)
+- bcrypt password hashing (cost 12)
+- File-based rate limiting (10 req / 15 min on auth endpoints)
+- Honeypot + math CAPTCHA on login
+- .htaccess protects data directory from direct access
 
-### Roles
+### First Login
+On first access, an initial admin account is created. Password is saved to:
+`hf-manage/data/initial_password.txt`
 
-| Role | Permissions |
-|------|-------------|
-| superadmin | Full access + manage other admins |
-| admin | Edit content, translations, gallery, settings |
+## Locale System
+
+### How it works
+1. **Source of truth:** `site/js/i18n.js` contains all translations
+2. **Build step:** `node build-locales.js` generates static HTML for each language
+3. **Each locale page** has translated text baked into HTML (no JS needed for content)
+4. **Language switcher** uses `<a>` links to locale URLs (not JS switching)
+5. **.htaccess** auto-redirects root `/` based on browser Accept-Language
+
+### URL structure
+| Language | URL | hreflang |
+|----------|-----|----------|
+| English (default) | `/` | `en` |
+| Russian | `/ru/` | `ru` |
+| Ukrainian | `/uk/` | `uk` |
+| Georgian | `/ka/` | `ka` |
+| Armenian | `/hy/` | `hy` |
+| Kazakh | `/kk/` | `kk` |
+
+### Adding a new language
+1. Add translation object in `site/js/i18n.js`
+2. Add `<a>` button in the `nav-lang` div in `site/index.html`
+3. Add font imports if needed (non-Latin scripts)
+4. Run `node build-locales.js`
+5. Update `site/sitemap.xml`
+6. Deploy
 
 ## Image Pipeline
 
-Original photos (HEIC/DNG) are not tracked in git. To re-convert:
-
 ```bash
-node convert-images.js    # DNG -> PNG + AVIF
-node convert-heic.js      # HEIC -> PNG + AVIF
-node optimize-images.js   # Resize to 1920px max, re-encode AVIF
+node convert-images.js    # DNG → PNG + AVIF
+node convert-heic.js      # HEIC → PNG + AVIF (via heic-convert)
+node optimize-images.js   # Resize to 1920px max, AVIF q80
 ```
 
 | Stage | Format | Avg Size |
 |-------|--------|----------|
 | Original | HEIC/DNG | ~3.5 MB |
-| Web-ready | AVIF (q80, max 1920px) | ~350 KB |
+| Web-ready | AVIF (q80, 1920px max) | ~350 KB |
+| OG Image | JPEG (1200×630) | ~140 KB |
 
-## Favicon & Logo
+## SSL
 
-Current favicon is an SVG placeholder (`site/favicon.svg`) with "HF" text in the brand gradient. Replace with the actual logo once designed:
+Let's Encrypt certificate installed via acme.sh:
+- Auto-renewal via cron (daily check)
+- Deployed to cPanel via `cpanel_uapi` hook
+- Covers `hitfactory.band` + `www.hitfactory.band`
 
-- `site/favicon.svg` — SVG favicon (modern browsers)
-- `site/apple-touch-icon.png` — 180x180 PNG for iOS (generate from logo)
+## Security
 
-## YouTube Video
-
-The video section uses a lite-youtube facade pattern. No iframe is loaded until the user clicks play. To change the video:
-
-1. Upload to YouTube, get the video ID from the URL (`youtube.com/watch?v=VIDEO_ID`)
-2. Update `data-videoid` in `site/index.html` or via Admin Panel → Settings → Video
-
-Current video: `BGo9yW8Uocs`
-
-## Adding a New Language
-
-1. Add translation object in `site/js/i18n.js`
-2. Add language button in `<div class="nav-lang">` in `index.html`
-3. Add font imports if needed (non-Latin scripts)
-4. Add `og:locale:alternate` meta tag
-5. The admin panel auto-detects available languages
+- HMAC-signed session cookies (httpOnly, strict SameSite, secure in production)
+- bcrypt password hashing (cost 12)
+- Rate limiting on auth endpoints
+- Honeypot + CAPTCHA on login
+- .htaccess blocks data directory access
+- noindex/nofollow on admin pages
+- Path traversal protection on file operations
+- Admin URL obfuscation (`/hf-manage/` not `/admin/`)
 
 ## License
 
