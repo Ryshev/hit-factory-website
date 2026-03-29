@@ -102,11 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
     while (placed < bodyCount) {
       const remaining = bodyCount - placed;
       if (remaining === 2) {
-        // Use asymmetric split for variety
         plan.push(patIdx % 2 === 0 ? [4, 2] : [2, 4]);
         placed += 2;
       } else if (remaining === 3) {
-        plan.push(patIdx % 2 === 0 ? [1, 3, 2] : [2, 1, 3]);
+        plan.push([2, 2, 2]);
         placed += 3;
       } else {
         const pat = ROW_PATTERNS[patIdx % ROW_PATTERNS.length];
@@ -116,13 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Last row — equal widths, fills full 6 columns
-    if (lastRowSize === 1) {
-      plan.push([6]);
-    } else {
-      const spanEach = Math.floor(GRID_COLS / lastRowSize);
-      plan.push(Array(lastRowSize).fill(spanEach));
-    }
+    // Last row — equal widths
+    const spanEach = lastRowSize === 2 ? 3 : 2;
+    plan.push(Array(lastRowSize).fill(spanEach));
 
     // Apply
     let idx = 0;
