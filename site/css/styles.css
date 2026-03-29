@@ -702,6 +702,7 @@ img {
   background-size: cover;
   background-position: center;
   transition: filter 0.3s ease;
+  pointer-events: none;
 }
 
 .lite-youtube:hover .lite-youtube-poster {
@@ -715,7 +716,7 @@ img {
   transform: translate(-50%, -50%);
   border: none;
   background: transparent;
-  cursor: pointer;
+  pointer-events: none;
   z-index: 1;
   transition: var(--transition);
   opacity: 0.9;

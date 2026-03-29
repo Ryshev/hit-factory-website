@@ -135,6 +135,22 @@ node optimize-images.js   # Resize to 1920px max, re-encode AVIF
 | Original | HEIC/DNG | ~3.5 MB |
 | Web-ready | AVIF (q80, max 1920px) | ~350 KB |
 
+## Favicon & Logo
+
+Current favicon is an SVG placeholder (`site/favicon.svg`) with "HF" text in the brand gradient. Replace with the actual logo once designed:
+
+- `site/favicon.svg` — SVG favicon (modern browsers)
+- `site/apple-touch-icon.png` — 180x180 PNG for iOS (generate from logo)
+
+## YouTube Video
+
+The video section uses a lite-youtube facade pattern. No iframe is loaded until the user clicks play. To change the video:
+
+1. Upload to YouTube, get the video ID from the URL (`youtube.com/watch?v=VIDEO_ID`)
+2. Update `data-videoid` in `site/index.html` or via Admin Panel → Settings → Video
+
+Current video: `BGo9yW8Uocs`
+
 ## Adding a New Language
 
 1. Add translation object in `site/js/i18n.js`
