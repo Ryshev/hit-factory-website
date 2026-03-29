@@ -13,6 +13,7 @@
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { text-decoration: none; color: inherit; }
 
     /* Header */
     .header {
@@ -127,11 +128,31 @@
     .toast.show { opacity: 1; transform: translateY(0); }
 
     .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+
+    /* Three-dot menu */
+    .dot-menu { position: relative; display: inline-block; }
+    .dot-menu-trigger {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-size: 18px; padding: 4px 8px; border-radius: 6px; line-height: 1;
+    }
+    .dot-menu-trigger:hover { background: var(--surface3); color: var(--text); }
+    .dot-menu-dropdown {
+      display: none; position: absolute; right: 0; top: 100%; margin-top: 4px;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      min-width: 140px; z-index: 50; overflow: hidden;
+    }
+    .dot-menu.open .dot-menu-dropdown { display: block; }
+    .dot-menu-item {
+      display: block; width: 100%; padding: 8px 14px; border: none; background: none;
+      color: var(--text); font-size: 13px; text-align: left; cursor: pointer; font-family: inherit;
+    }
+    .dot-menu-item:hover { background: var(--surface3); }
+    .dot-menu-item.danger { color: var(--danger); }
   </style>
 </head>
 <body>
   <header class="header">
-    <h1>HIT FACTORY — Admin</h1>
+    <a href="/" style="text-decoration:none"><h1>HIT FACTORY</h1></a>
     <div class="actions">
       <span id="userInfo" style="color:var(--muted);font-size:12px;margin-right:8px"></span>
       <a href="/" class="btn btn-outline" target="_blank">View Site</a>
@@ -578,9 +599,21 @@
             <span style="font-weight:500">${esc(a.email)}</span>
             <span style="color:var(--muted);font-size:12px;margin-left:8px">${a.role}</span>
           </div>
-          ${a.id !== currentUser?.id ? `<button class="btn btn-sm" style="background:var(--danger);color:white" onclick="removeAdmin('${a.id}')">Remove</button>` : '<span style="color:var(--muted);font-size:12px">you</span>'}
+          ${a.id !== currentUser?.id ? `
+            <div class="dot-menu">
+              <button class="dot-menu-trigger" onclick="this.parentElement.classList.toggle('open')">&#8943;</button>
+              <div class="dot-menu-dropdown">
+                <button class="dot-menu-item danger" onclick="removeAdmin('${a.id}')">Remove admin</button>
+              </div>
+            </div>` : '<span style="color:var(--muted);font-size:12px">you</span>'}
         </div>
       `).join('');
+      // Close dot-menus on outside click
+      document.addEventListener('click', e => {
+        if (!e.target.closest('.dot-menu')) {
+          document.querySelectorAll('.dot-menu.open').forEach(m => m.classList.remove('open'));
+        }
+      });
     }
 
     async function addAdmin() {
