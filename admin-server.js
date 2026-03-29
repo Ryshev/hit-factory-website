@@ -4,7 +4,7 @@ const path = require('path');
 
 const app = express();
 const PORT = 3000;
-const ADMIN_SLUG = '311ec09d6d1b971014d31e19';
+const ADMIN_SLUG = 'hf-manage';
 const DATA_FILE = path.join(__dirname, 'site', 'admin', 'data', 'site-data.json');
 
 app.use(express.json({ limit: '10mb' }));
