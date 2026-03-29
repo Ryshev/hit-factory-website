@@ -111,15 +111,36 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0';
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0&enablejsapi=1';
       iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
       iframe.allowFullscreen = true;
       iframe.title = el.dataset.title || 'Video';
+      iframe.id = 'yt-iframe';
       el.innerHTML = '';
       el.appendChild(iframe);
       el.classList.add('playing');
     });
   });
+
+  /* ---- Pause YouTube on tab switch or out of viewport ---- */
+  function postYTCommand(cmd) {
+    const iframe = document.getElementById('yt-iframe');
+    if (iframe) iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: cmd, args: [] }), '*');
+  }
+
+  // Pause when tab is hidden
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) postYTCommand('pauseVideo');
+  });
+
+  // Pause when video scrolls out of viewport
+  const videoObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) postYTCommand('pauseVideo');
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.lite-youtube').forEach(el => videoObserver.observe(el));
 
   /* ---- Smooth scroll for anchor links ---- */
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {

@@ -107,22 +107,11 @@ function ensureInitialAdmin() {
     chmod($logFile, 0600);
 }
 
-// Load translations from i18n.js source file
+// Load default translations from pre-exported JSON
 function loadTranslationsFromSource() {
-    $i18nPath = dirname(__DIR__) . '/js/i18n.js';
-    if (!file_exists($i18nPath)) return [];
-    $src = file_get_contents($i18nPath);
-    // Extract the translations object using regex
-    if (preg_match('/const translations\s*=\s*(\{[\s\S]*?\n\};)/', $src, $m)) {
-        $jsObj = preg_replace('/;$/', '', $m[1]);
-        // Convert JS object to JSON: add quotes around keys
-        $json = preg_replace("/(\w+)(?=\s*:)/", '"$1"', $jsObj);
-        // Fix single quotes to double quotes
-        $json = str_replace("'", '"', $json);
-        // Remove trailing commas before } or ]
-        $json = preg_replace('/,\s*([\]}])/', '$1', $json);
-        $result = json_decode($json, true);
-        if ($result) return $result;
+    $jsonPath = DATA_DIR . '/translations-default.json';
+    if (file_exists($jsonPath)) {
+        return json_decode(file_get_contents($jsonPath), true) ?: [];
     }
     return [];
 }
