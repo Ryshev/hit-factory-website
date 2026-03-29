@@ -1,0 +1,31 @@
+node_modules/
+package-lock.json
+
+# Original and intermediate image files
+Mediafiles/Heic/
+Mediafiles/png/
+Mediafiles/avif/
+Mediafiles/avif-optimized/
+Mediafiles/preview-*
+
+# Video files (too large for git)
+Mediafiles/Video/
+
+# Conversion scripts (dev tools)
+convert-images.js
+convert-heic.js
+optimize-images.js
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Admin data (local)
+site/admin/data/*.json
+!site/admin/data/_default.json

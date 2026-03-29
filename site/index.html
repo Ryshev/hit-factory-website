@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hit Factory — Cover Band</title>
+  <meta name="description" content="Hit Factory — professional cover band for your events. Live music, unforgettable performances.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-logo">HIT FACTORY</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="#home" data-i18n="nav.home">Home</a></li>
+        <li><a href="#about" data-i18n="nav.about">About</a></li>
+        <li><a href="#gallery" data-i18n="nav.gallery">Gallery</a></li>
+        <li><a href="#video" data-i18n="nav.video">Video</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+      </ul>
+      <div class="nav-lang">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="ru">RU</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-bg">
+      <picture>
+        <source srcset="images/hero-bg.avif" type="image/avif">
+        <img src="images/hero-bg.avif" alt="Hit Factory on stage" loading="eager">
+      </picture>
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="hero-title-line">HIT</span>
+        <span class="hero-title-line accent">FACTORY</span>
+      </h1>
+      <p class="hero-subtitle" data-i18n="hero.subtitle">Professional Cover Band</p>
+      <p class="hero-description" data-i18n="hero.description">We bring the energy of live music to your event. From classic hits to modern chart-toppers — every performance is unforgettable.</p>
+      <a href="#contact" class="btn btn-primary" data-i18n="hero.cta">Book Now</a>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-indicator"></div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section about" id="about">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="about.tag">Who We Are</span>
+        <h2 class="section-title" data-i18n="about.title">Your Event.<br>Our Sound.</h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-text">
+          <p data-i18n="about.text1">Hit Factory is a professional cover band that transforms any event into an unforgettable experience. Our repertoire spans decades — from timeless classics to today's biggest hits.</p>
+          <p data-i18n="about.text2">Five talented musicians, state-of-the-art sound, and a spectacular light show — we deliver a concert-level performance at every event, whether it's a corporate party, wedding, or private celebration.</p>
+          <div class="about-stats">
+            <div class="stat">
+              <span class="stat-number">5</span>
+              <span class="stat-label" data-i18n="about.musicians">Musicians</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">200+</span>
+              <span class="stat-label" data-i18n="about.songs">Songs</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">100+</span>
+              <span class="stat-label" data-i18n="about.events">Events</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-image">
+          <img src="images/band-full-blue.avif" alt="Hit Factory band" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section class="section gallery" id="gallery">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="gallery.tag">Gallery</span>
+        <h2 class="section-title" data-i18n="gallery.title">Live Moments</h2>
+      </div>
+      <div class="gallery-grid">
+        <div class="gallery-item gallery-item--wide">
+          <img src="images/band-full-teal.avif" alt="Band performing" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item">
+          <img src="images/vocalist-singing.avif" alt="Vocalist" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item">
+          <img src="images/guitarist-solo.avif" alt="Guitarist" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item gallery-item--tall">
+          <img src="images/bassist-solo-white.avif" alt="Bassist" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item gallery-item--wide">
+          <img src="images/duo-guitar-vocal.avif" alt="Duo performance" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item">
+          <img src="images/drummer-solo.avif" alt="Drummer" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item">
+          <img src="images/vocalist-closeup.avif" alt="Vocalist closeup" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item gallery-item--wide">
+          <img src="images/band-full-led.avif" alt="Band with LED background" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item">
+          <img src="images/guitarist-acoustic.avif" alt="Acoustic guitar" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item">
+          <img src="images/bassist-solo-blue.avif" alt="Bassist solo" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item gallery-item--tall">
+          <img src="images/vocalist-solo.avif" alt="Vocalist solo" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item">
+          <img src="images/band-silhouette.avif" alt="Band silhouette" loading="lazy">
+          <div class="gallery-overlay"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" aria-label="Close">&times;</button>
+    <button class="lightbox-prev" aria-label="Previous">&#10094;</button>
+    <button class="lightbox-next" aria-label="Next">&#10095;</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+  </div>
+
+  <!-- Video Section -->
+  <section class="section video-section" id="video">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="video.tag">Promo</span>
+        <h2 class="section-title" data-i18n="video.title">See Us Live</h2>
+      </div>
+      <div class="video-wrapper">
+        <video controls preload="metadata" poster="images/band-full-pink.avif">
+          <source src="../Mediafiles/Video/Hit factory 4k.mp4" type="video/mp4">
+          <span data-i18n="video.fallback">Your browser does not support the video tag.</span>
+        </video>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section contact" id="contact">
+    <div class="contact-bg">
+      <img src="images/band-silhouette.avif" alt="" loading="lazy">
+      <div class="contact-overlay"></div>
+    </div>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="contact.tag">Get in Touch</span>
+        <h2 class="section-title" data-i18n="contact.title">Book Hit Factory</h2>
+      </div>
+      <p class="contact-description" data-i18n="contact.description">Ready to make your event unforgettable? Reach out to us through any of the channels below.</p>
+      <div class="contact-grid">
+        <a href="tel:+1234567890" class="contact-card">
+          <div class="contact-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <span class="contact-label" data-i18n="contact.phone">Phone</span>
+          <span class="contact-value">+1 (234) 567-890</span>
+        </a>
+        <a href="mailto:hitfactory@email.com" class="contact-card">
+          <div class="contact-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <span class="contact-label" data-i18n="contact.email">Email</span>
+          <span class="contact-value">hitfactory@email.com</span>
+        </a>
+        <a href="https://instagram.com/hitfactory" target="_blank" rel="noopener" class="contact-card">
+          <div class="contact-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </div>
+          <span class="contact-label">Instagram</span>
+          <span class="contact-value">@hitfactory</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <span class="footer-logo">HIT FACTORY</span>
+        <p class="footer-copy">&copy; 2026 Hit Factory. <span data-i18n="footer.rights">All rights reserved.</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
