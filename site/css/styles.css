@@ -1012,6 +1012,10 @@ img {
     grid-column: span 1 !important;
   }
 
+  .gallery-item:last-child:nth-child(odd) {
+    grid-column: span 2 !important;
+  }
+
   .footer-content {
     flex-direction: column;
     gap: 12px;
