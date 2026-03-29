@@ -372,3 +372,102 @@ This prevents redirect loops when a Russian-speaking user clicks EN.
 8. Export translations JSON for admin
 9. Update `sitemap.xml`, `.htaccess` with correct domain/slugs
 10. Deploy via SCP, install SSL via acme.sh
+
+## 13. Admin Panel v2 — Page-Based Architecture (for future projects)
+
+The Hit Factory admin uses a **language-first** sidebar: pick a language, then edit all sections. This works for a single-page site, but for multi-page sites a **page-first** approach (like WordPress + Polylang) is better.
+
+### Current approach (Hit Factory)
+
+```
+Sidebar: EN | RU | UA | GE | AM | KZ → tabs: Hero | About | Gallery | Contact | SEO
+```
+
+Works for: single-page sites, landing pages, simple portfolios.
+Limitation: all content is flat — no concept of "pages".
+
+### Recommended approach for future projects
+
+```
+Sidebar:
+  Pages
+    ├── Home          → click → locale tabs: EN | RU | UA | ... → fields for this page
+    ├── About         → click → locale tabs: EN | RU | UA | ... → fields for this page
+    ├── Services      → click → locale tabs: EN | RU | UA | ...
+    └── Contact       → click → locale tabs: EN | RU | UA | ...
+  Options
+    ├── Header        → locale tabs → logo, nav items, CTA button text
+    └── Footer        → locale tabs → copyright, social links, address
+  Gallery             → drag-and-drop photos (shared across locales)
+  Code Injection      → head code, footer code (global, no locales)
+  SEO                 → per-page, per-locale: title, description, OG image
+  Admins              → user management
+```
+
+### Key differences from current approach
+
+| Aspect | Current (Hit Factory) | Recommended v2 |
+|--------|----------------------|----------------|
+| Navigation | Language-first | Page-first |
+| Content scope | All content flat | Per-page content |
+| Shared elements | Mixed with page content | Separate Options section (Header, Footer) |
+| SEO | Per-locale tab on each language | Per-page, per-locale |
+| Code injection | Inside Settings tab | Standalone section |
+| Scalability | 1 page only | Multi-page sites |
+
+### Data structure for v2
+
+```json
+{
+  "pages": {
+    "home": {
+      "en": { "hero.title": "...", "hero.description": "..." },
+      "ru": { "hero.title": "...", "hero.description": "..." }
+    },
+    "about": {
+      "en": { "about.text": "..." },
+      "ru": { "about.text": "..." }
+    }
+  },
+  "options": {
+    "header": {
+      "en": { "nav.home": "Home", "nav.about": "About", "cta": "Book Now" },
+      "ru": { "nav.home": "Главная", "nav.about": "О нас", "cta": "Забронировать" }
+    },
+    "footer": {
+      "en": { "copyright": "All rights reserved." },
+      "ru": { "copyright": "Все права защищены." }
+    }
+  },
+  "gallery": ["images/photo1.avif", "images/photo2.avif"],
+  "codeInjection": { "head": "<script>...</script>", "footer": "" },
+  "seo": {
+    "home": {
+      "en": { "title": "...", "description": "...", "ogImage": "..." },
+      "ru": { "title": "...", "description": "...", "ogImage": "..." }
+    }
+  }
+}
+```
+
+### UI flow
+
+1. Click **Pages → Home** in sidebar
+2. See locale tabs: **EN | RU | UA | GE | AM | KZ**
+3. Each tab shows fields for that page in that language
+4. Click **Options → Header** — same locale tabs, but for shared header fields
+5. **Gallery** — no locales, shared images
+6. **Code Injection** — no locales, global head/footer HTML
+7. **SEO** — select page, then locale, then title/description/OG
+
+### Build integration
+
+```
+Admin saves → writes per-page JSON
+Build script reads JSON → generates static HTML per page per locale:
+  /en/index.html, /ru/index.html         (home)
+  /en/about/index.html, /ru/about/       (about)
+  /en/services/, /ru/services/           (services)
+```
+
+This is the architecture to use for the next multi-page project.
