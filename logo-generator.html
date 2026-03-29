@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hit Factory — Logo Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #1a1a1a;
+      color: #fff;
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      gap: 60px;
+    }
+
+    h1 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 28px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .variant-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 60px;
+      justify-content: center;
+    }
+
+    .variant {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .variant-label {
+      font-size: 14px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Each logo is rendered inside a 400x400 container */
+    .logo-wrap {
+      width: 400px;
+      height: 400px;
+      position: relative;
+    }
+
+    /* ===== VARIANT 1: Gradient border + HF text ===== */
+    .v1 {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .v1-inner {
+      width: 370px;
+      height: 370px;
+      border-radius: 50%;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .v1-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 120px;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ===== VARIANT 2: Solid gradient circle + white text ===== */
+    .v2 {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .v2-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 120px;
+      letter-spacing: 6px;
+      color: #ffffff;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+
+    /* ===== VARIANT 3: Dark circle, gradient border, full name ===== */
+    .v3 {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .v3-inner {
+      width: 370px;
+      height: 370px;
+      border-radius: 50%;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .v3-hit {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 72px;
+      letter-spacing: 12px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    .v3-factory {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      letter-spacing: 18px;
+      text-transform: uppercase;
+      color: #999;
+      line-height: 1;
+    }
+
+    /* ===== VARIANT 4: Glow effect, dark bg ===== */
+    .v4 {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #1a1a1a, #0a0a0a);
+      border: 3px solid rgba(226, 58, 110, 0.6);
+      box-shadow:
+        0 0 30px rgba(226, 58, 110, 0.3),
+        0 0 60px rgba(108, 60, 224, 0.2),
+        inset 0 0 30px rgba(226, 58, 110, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .v4-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 120px;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 20px rgba(226, 58, 110, 0.5));
+    }
+
+    /* ===== VARIANT 5: Triple gradient border + HF ===== */
+    .v5 {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0, #00b4ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .v5-inner {
+      width: 370px;
+      height: 370px;
+      border-radius: 50%;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .v5-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 120px;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0, #00b4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ===== VARIANT 6: Solid gradient + dark HF ===== */
+    .v6 {
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e23a6e, #6c3ce0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .v6-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 120px;
+      letter-spacing: 6px;
+      color: #0a0a0a;
+    }
+
+    /* Export helper */
+    .instructions {
+      max-width: 600px;
+      text-align: center;
+      color: #666;
+      font-size: 13px;
+      line-height: 1.8;
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #333;
+      border-radius: 12px;
+    }
+    .instructions code {
+      background: #333;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #e23a6e;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Hit Factory — Instagram Logo Variants</h1>
+
+  <div class="variant-row">
+
+    <!-- Variant 1 -->
+    <div class="variant">
+      <div class="variant-label">1 — Gradient Ring</div>
+      <div class="logo-wrap">
+        <div class="v1">
+          <div class="v1-inner">
+            <span class="v1-text">HF</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variant 2 -->
+    <div class="variant">
+      <div class="variant-label">2 — Solid Gradient</div>
+      <div class="logo-wrap">
+        <div class="v2">
+          <span class="v2-text">HF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variant 3 -->
+    <div class="variant">
+      <div class="variant-label">3 — Full Name</div>
+      <div class="logo-wrap">
+        <div class="v3">
+          <div class="v3-inner">
+            <span class="v3-hit">HIT</span>
+            <span class="v3-factory">FACTORY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="variant-row">
+
+    <!-- Variant 4 -->
+    <div class="variant">
+      <div class="variant-label">4 — Neon Glow</div>
+      <div class="logo-wrap">
+        <div class="v4">
+          <span class="v4-text">HF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variant 5 -->
+    <div class="variant">
+      <div class="variant-label">5 — Triple Gradient</div>
+      <div class="logo-wrap">
+        <div class="v5">
+          <div class="v5-inner">
+            <span class="v5-text">HF</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variant 6 -->
+    <div class="variant">
+      <div class="variant-label">6 — Inverted</div>
+      <div class="logo-wrap">
+        <div class="v6">
+          <span class="v6-text">HF</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="instructions">
+    <strong>Как сохранить в PNG:</strong><br>
+    Откройте DevTools (F12) → Console → вставьте команду ниже, заменив <code>.v1</code> на класс нужного варианта.<br><br>
+    Или просто скажите мне какой вариант нравится — я сконвертирую в PNG 1080×1080 через Sharp.
+  </div>
+
+</body>
+</html>
