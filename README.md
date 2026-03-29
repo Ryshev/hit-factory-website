@@ -201,17 +201,22 @@ echo "Done";
 ### First Login
 
 On first access, an initial admin account is created. Password saved to:
-`hf-manage/data/initial_password.txt`
+`hf-manage/data/initial_password.txt` (auto-deleted after first successful login)
 
 ### Security
 
-- HMAC-signed httpOnly cookies (4h expiry, SameSite=Strict, Secure in production)
+- HMAC-signed httpOnly cookies (2h expiry, SameSite=Strict, Secure in production)
+- Cryptographically random AUTH_SECRET (48 bytes, base64url)
 - bcrypt password hashing (cost 12)
-- File-based rate limiting (10 req / 15 min on login, password change, reset)
+- File-based rate limiting (10 req / 15 min on auth, 30/min on data save)
 - Honeypot field + math CAPTCHA on login form
+- MIME type validation on file uploads (finfo magic bytes, not just extension)
+- Gallery image src whitelist (regex filter, only `images/*.{avif,jpg,png,webp}`)
+- X-Frame-Options: DENY, X-Content-Type-Options: nosniff on admin
 - .htaccess blocks `data/` directory from direct access
-- `noindex, nofollow` on admin pages
+- `noindex, nofollow` + Referrer-Policy on admin pages
 - Path traversal protection (`basename()`) on file operations
+- Initial password file auto-deleted after first login
 - Superadmin role required for user management
 - Cannot delete last superadmin or yourself
 
@@ -331,6 +336,71 @@ Let's Encrypt via acme.sh:
 - Gzip compression + cache headers via .htaccess
 - No JavaScript frameworks (~6KB total JS)
 - Fluid typography with `clamp()` — no layout shifts on resize
+
+## Testing Checklist
+
+No automated tests (project is a static site + simple PHP API). Use this manual checklist after changes:
+
+### Frontend
+- [ ] All 6 locale pages load (`/`, `/ru/`, `/ua/`, `/ge/`, `/am/`, `/kz/`)
+- [ ] Language switcher navigates between locales
+- [ ] Hero background image visible
+- [ ] YouTube video plays on click, pauses on tab switch
+- [ ] Gallery loads from content.json, lightbox works (click, arrows, Esc)
+- [ ] Gallery adapts to different photo counts (no empty space)
+- [ ] Contact links work (tel:, mailto:, Instagram)
+- [ ] Mobile: hamburger menu opens/closes, closes on outside click
+- [ ] Mobile: no horizontal scroll, text readable
+- [ ] Scroll reveal animations trigger on scroll
+- [ ] Footer year auto-generated
+
+### Admin Panel
+- [ ] Login with CAPTCHA works
+- [ ] Incorrect password shows error, rate-limits after 10 attempts
+- [ ] Edit text on any language → Save → text appears on site
+- [ ] Gallery: drag reorder, upload, delete → Save → reflected on site
+- [ ] SEO fields per-locale (page title, meta description)
+- [ ] OG image upload with preview
+- [ ] Code injection: head and footer fields
+- [ ] Settings: contacts, video ID, stats
+- [ ] Admins: add/remove (superadmin only), change password
+- [ ] Logout works, session expires after 2h
+
+### SEO
+- [ ] `<title>` and `<meta description>` per locale
+- [ ] `og:title`, `og:description`, `og:image` on all pages
+- [ ] hreflang tags present and correct
+- [ ] robots.txt blocks `/hf-manage/`
+- [ ] sitemap.xml lists all locale URLs
+- [ ] Google verification meta tag in static HTML
+- [ ] Old slugs (/uk/, /ka/, /hy/, /kk/) 301-redirect to new ones
+
+### Security
+- [ ] Admin pages return `X-Frame-Options: DENY`
+- [ ] File upload rejects non-image MIME types
+- [ ] Cannot access `hf-manage/data/` directly (403)
+- [ ] CSS/JS have `?v=` cache busting parameter
+
+## Security Audit Summary
+
+Last audit: March 29, 2026. Key findings addressed:
+
+| Issue | Severity | Status |
+|-------|----------|--------|
+| Hardcoded AUTH_SECRET | CRITICAL | Fixed — random 48-byte secret |
+| Gallery XSS via img src | HIGH | Fixed — regex whitelist filter |
+| No MIME validation on upload | HIGH | Fixed — finfo magic bytes check |
+| No rate limit on data save | HIGH | Fixed — 30/min limit |
+| Missing security headers | MEDIUM | Fixed — X-Frame-Options, X-Content-Type-Options |
+| Password logged in plaintext | MEDIUM | Fixed — auto-deleted after first login |
+| Session lifetime too long | LOW | Fixed — reduced to 2 hours |
+
+### Known Limitations (accepted risk)
+- No CSRF tokens (mitigated by SameSite=Strict cookies)
+- No 2FA (low-traffic admin, acceptable for now)
+- No audit logging (consider adding if multiple admins active)
+- Code injection fields trust admin input (by design — admin-only feature)
+- Data stored in JSON files within webroot (protected by .htaccess)
 
 ## License
 

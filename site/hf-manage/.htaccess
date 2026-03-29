@@ -8,5 +8,8 @@ RewriteRule ^api/(.*)$ api.php [QSA,L]
 # Block direct access to data directory
 RewriteRule ^data/ - [F,L]
 
-# No indexing
+# Security headers
 Header set X-Robots-Tag "noindex, nofollow"
+Header set X-Frame-Options "DENY"
+Header set X-Content-Type-Options "nosniff"
+Header set Referrer-Policy "strict-origin-when-cross-origin"

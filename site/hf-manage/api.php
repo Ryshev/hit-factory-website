@@ -192,6 +192,10 @@ if ($path === 'login' && $method === 'POST') {
         exit;
     }
 
+    // Remove initial password file on first successful login
+    $initPwFile = DATA_DIR . '/initial_password.txt';
+    if (file_exists($initPwFile)) unlink($initPwFile);
+
     $token = createToken($user['id'], $user['email'], $user['role']);
     $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
     setcookie('hf_token', $token, [
@@ -388,6 +392,7 @@ if ($path === 'data' && $method === 'GET') {
 
 if ($path === 'data' && $method === 'POST') {
     requireAuth();
+    checkRateLimit('data-save', 30, 60); // 30 saves per minute max
     $input = json_decode(file_get_contents('php://input'), true);
     if ($input) {
         file_put_contents(SITE_DATA_FILE, json_encode($input, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -437,6 +442,13 @@ if ($path === 'images/upload' && $method === 'POST') {
 
             $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
             if (!in_array($ext, ['avif', 'jpg', 'jpeg', 'png', 'webp'])) continue;
+
+            // Verify actual MIME type (not just extension)
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $tmp);
+            finfo_close($finfo);
+            $allowedMimes = ['image/avif', 'image/jpeg', 'image/png', 'image/webp'];
+            if (!in_array($mime, $allowedMimes)) continue;
 
             $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '-', pathinfo($name, PATHINFO_FILENAME));
             $newName = $safeName . '-' . base_convert(time(), 10, 36) . '.' . $ext;

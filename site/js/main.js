@@ -103,9 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Dynamic gallery
       if (data.gallery && data.gallery.length > 0 && galleryGrid) {
-        galleryGrid.innerHTML = data.gallery.map(src =>
-          `<div class="gallery-item"><img src="/${src}" alt="Hit Factory live" loading="lazy"><div class="gallery-overlay"></div></div>`
-        ).join('');
+        galleryGrid.innerHTML = data.gallery
+          .filter(src => /^images\/[a-zA-Z0-9_.-]+\.(avif|jpg|jpeg|png|webp)$/.test(src))
+          .map(src =>
+            `<div class="gallery-item"><img src="/${src}" alt="Hit Factory live" loading="lazy"><div class="gallery-overlay"></div></div>`
+          ).join('');
         layoutGallery(galleryGrid);
         initLightbox();
         galleryGrid.querySelectorAll('.gallery-item').forEach(el => {

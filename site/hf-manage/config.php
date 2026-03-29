@@ -4,11 +4,11 @@
  * Change these values after first deployment!
  */
 
-// Secret key for JWT-like session tokens (change this!)
-define('AUTH_SECRET', 'hf_change_this_secret_key_in_production_2026');
+// Secret key for session tokens — MUST be unique per deployment
+define('AUTH_SECRET', 'JW378nXs7QZGQ4xpqEjj98rXY9hmr6yExmwNEFfT3v3zjve_hSfxaHs-kBNw_7Mc');
 
-// Session lifetime in seconds (4 hours)
-define('SESSION_LIFETIME', 4 * 60 * 60);
+// Session lifetime in seconds (2 hours)
+define('SESSION_LIFETIME', 2 * 60 * 60);
 
 // Data storage paths
 define('DATA_DIR', __DIR__ . '/data');
