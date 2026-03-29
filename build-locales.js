@@ -113,18 +113,26 @@ function prepareForLocale(html, lang) {
     `\n${hreflangTags}\n$1`
   );
 
-  // For non-root locales, fix relative asset paths
+  // For non-root locales, fix relative asset paths to use absolute paths
   if (lang !== 'en') {
-    // CSS, JS, images — prefix with ../
-    html = html.replace(/href="css\//g, 'href="../css/');
-    html = html.replace(/src="js\//g, 'src="../js/');
-    html = html.replace(/src="images\//g, 'src="../images/');
-    html = html.replace(/href="favicon\.svg"/g, 'href="../favicon.svg"');
-    html = html.replace(/href="apple-touch-icon\.png"/g, 'href="../apple-touch-icon.png"');
-    html = html.replace(/url\('images\//g, "url('../images/");
-    // Video poster
-    html = html.replace(/src="\.\.\/Mediafiles/g, 'src="../../Mediafiles');
+    html = html.replace(/href="css\//g, 'href="/css/');
+    html = html.replace(/src="js\//g, 'src="/js/');
+    html = html.replace(/src="images\//g, 'src="/images/');
+    html = html.replace(/srcset="images\//g, 'srcset="/images/');
+    html = html.replace(/href="favicon\.svg"/g, 'href="/favicon.svg"');
+    html = html.replace(/href="apple-touch-icon\.png"/g, 'href="/apple-touch-icon.png"');
+    html = html.replace(/url\('images\//g, "url('/images/");
   }
+
+  // Fix OG image to always use absolute URL
+  html = html.replace(
+    /<meta property="og:image" content="[^"]*">/,
+    `<meta property="og:image" content="${BASE_URL}/images/og-image.jpg">`
+  );
+  html = html.replace(
+    /<meta name="twitter:image" content="[^"]*">/,
+    `<meta name="twitter:image" content="${BASE_URL}/images/og-image.jpg">`
+  );
 
   // Update active language in switcher
   // Remove active from all lang buttons, add to current
