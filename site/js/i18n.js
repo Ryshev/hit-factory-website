@@ -1,6 +1,7 @@
 /* Internationalization module — 6 languages */
 const translations = {
   en: {
+    'page.title': 'Hit Factory — Premium Cover Band | Live Music for Events',
     'nav.home': 'Home',
     'nav.about': 'About',
     'nav.gallery': 'Gallery',
@@ -38,6 +39,7 @@ const translations = {
   },
 
   ru: {
+    'page.title': 'Hit Factory — Премиум Кавер Бенд | Живая музыка на мероприятие',
     'nav.home': 'Главная',
     'nav.about': 'О нас',
     'nav.gallery': 'Галерея',
@@ -75,6 +77,7 @@ const translations = {
   },
 
   uk: {
+    'page.title': 'Hit Factory — Преміум Кавер Бенд | Жива музика на подію',
     'nav.home': 'Головна',
     'nav.about': 'Про нас',
     'nav.gallery': 'Галерея',
@@ -112,6 +115,7 @@ const translations = {
   },
 
   ka: {
+    'page.title': 'Hit Factory — Premium Cover Band',
     'nav.home': '\u10db\u10d7\u10d0\u10d5\u10d0\u10e0\u10d8',
     'nav.about': '\u10e9\u10d5\u10d4\u10dc\u10e1 \u10e8\u10d4\u10e1\u10d0\u10ee\u10d4\u10d1',
     'nav.gallery': '\u10d2\u10d0\u10da\u10d4\u10e0\u10d4\u10d0',
@@ -151,6 +155,7 @@ const translations = {
 
   // Armenian — auto-translated via Google Translate, may need review
   hy: {
+    'page.title': 'Hit Factory — Premium Cover Band',
     'nav.home': '\u0533\u056c\u056d\u0561\u057e\u0578\u0580',
     'nav.about': '\u0544\u0565\u0580 \u0574\u0561\u057d\u056b\u0576',
     'nav.gallery': '\u054a\u0561\u057f\u056f\u0565\u0580\u0561\u057d\u0580\u0561\u0570',
@@ -189,6 +194,7 @@ const translations = {
   },
 
   kk: {
+    'page.title': 'Hit Factory — Кәсіби Кавер Бенд | Тірі музыка',
     'nav.home': 'Басты',
     'nav.about': 'Біз туралы',
     'nav.gallery': 'Галерея',
@@ -247,6 +253,10 @@ function setLanguage(lang) {
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
+
+  // Update page title
+  const pageTitle = translations[lang]?.['page.title'];
+  if (pageTitle) document.title = pageTitle;
 
   // Update OG locale meta
   const localeMap = { en: 'en_US', ru: 'ru_RU', uk: 'uk_UA', ka: 'ka_GE', hy: 'hy_AM', kk: 'kk_KZ' };
