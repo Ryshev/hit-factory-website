@@ -17,6 +17,10 @@ const translations = new Function('return ' + match[1].replace(/;$/, ''))();
 const LANGS = Object.keys(translations);
 const BASE_URL = 'https://hitfactory.band';
 
+// Cache busting version (date-time based)
+const now = new Date();
+const VERSION = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+
 // Map language code to URL slug (country-based)
 const SLUG_MAP = { en: 'en', ru: 'ru', uk: 'ua', ka: 'ge', hy: 'am', kk: 'kz' };
 function langToSlug(lang) { return SLUG_MAP[lang] || lang; }
@@ -129,6 +133,11 @@ function prepareForLocale(html, lang) {
     html = html.replace(/href="apple-touch-icon\.png"/g, 'href="/apple-touch-icon.png"');
     html = html.replace(/url\('images\//g, "url('/images/");
   }
+
+  // Cache busting — append version to CSS and JS
+  html = html.replace(/(styles\.css)/g, `$1?v=${VERSION}`);
+  html = html.replace(/(i18n\.js)/g, `$1?v=${VERSION}`);
+  html = html.replace(/(main\.js)/g, `$1?v=${VERSION}`);
 
   // Fix OG image to always use absolute URL
   html = html.replace(
