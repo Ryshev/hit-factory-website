@@ -66,23 +66,86 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- Dynamic gallery from content.json ---- */
   const galleryGrid = document.querySelector('.gallery-grid');
 
+  // Assign grid spans to fill 6-column grid without gaps
+  function assignGridSpans(container) {
+    const items = container.querySelectorAll('.gallery-item');
+    const count = items.length;
+    if (!count) return;
+
+    // Reset all spans
+    items.forEach(el => el.classList.remove('span-2', 'span-3', 'span-tall'));
+
+    // Pattern: fill rows of 6 columns
+    // Row patterns: [3,3], [2,2,2], [3,3] with occasional tall
+    let col = 0;
+    let rowType = 0;
+    const patterns = [[3,3],[2,2,2],[3,3],[2,4],[4,2],[2,2,2]];
+
+    for (let i = 0; i < count; i++) {
+      if (col === 0) {
+        // Pick pattern that fits remaining items
+        const remaining = count - i;
+        if (remaining >= 6) {
+          rowType = i % patterns.length;
+        } else if (remaining >= 4) {
+          rowType = remaining === 4 ? 3 : (remaining === 5 ? 1 : 0);
+        } else if (remaining === 3) {
+          rowType = 0; // [3,3] — will only use first 3
+        } else if (remaining === 2) {
+          rowType = 0; // [3,3]
+        } else {
+          // 1 item left — span full row
+          items[i].classList.add('span-3');
+          items[i].classList.add('span-tall');
+          break;
+        }
+      }
+
+      const pattern = patterns[rowType % patterns.length];
+      const spanIdx = Math.min(col, pattern.length - 1);
+      let span = pattern[spanIdx] || 2;
+
+      // Check if this is last item and doesn't fill the row
+      const remaining = count - i;
+      if (remaining === 1 && col > 0) {
+        span = 6 - col; // Fill rest of row
+      }
+
+      if (span === 2) items[i].classList.add('span-2');
+      else if (span === 3) items[i].classList.add('span-3');
+      else if (span === 4) { items[i].classList.add('span-2'); items[i].style.gridColumn = 'span 4'; }
+
+      col += span;
+      if (col >= 6) col = 0;
+    }
+
+    // Add occasional tall items for variety
+    if (count > 6) {
+      const tallIdx = 5; // 6th item
+      if (items[tallIdx]) items[tallIdx].classList.add('span-tall');
+    }
+  }
+
   async function loadGallery() {
     try {
       const res = await fetch('/data/content.json');
-      if (!res.ok) return; // No content.json yet — use HTML defaults
+      if (!res.ok) throw new Error('no content.json');
       const data = await res.json();
       if (data.gallery && data.gallery.length > 0 && galleryGrid) {
         galleryGrid.innerHTML = data.gallery.map(src =>
           `<div class="gallery-item"><img src="/${src}" alt="Hit Factory live" loading="lazy"><div class="gallery-overlay"></div></div>`
         ).join('');
+        assignGridSpans(galleryGrid);
         initLightbox();
-        // Observe new items for scroll reveal
         galleryGrid.querySelectorAll('.gallery-item').forEach(el => {
           el.classList.add('reveal');
           revealObserver.observe(el);
         });
       }
-    } catch (e) { /* Use HTML defaults */ }
+    } catch (e) {
+      // Use HTML defaults, still assign spans
+      if (galleryGrid) assignGridSpans(galleryGrid);
+    }
   }
 
   loadGallery();
