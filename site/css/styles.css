@@ -258,10 +258,11 @@ img {
 
 .hero-title-line {
   display: block;
-  font-size: clamp(60px, 15vw, 180px);
+  font-size: clamp(40px, 13vw, 180px);
   font-weight: 700;
-  letter-spacing: clamp(4px, 1.5vw, 12px);
+  letter-spacing: clamp(2px, 1vw, 12px);
   color: var(--color-text);
+  white-space: nowrap;
 }
 
 .hero-title-line.accent {
