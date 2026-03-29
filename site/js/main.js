@@ -139,12 +139,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Dynamic gallery
       if (data.gallery && data.gallery.length > 0 && galleryGrid) {
-        galleryGrid.innerHTML = data.gallery
-          .filter(src => /^images\/[a-zA-Z0-9_.-]+\.(avif|jpg|jpeg|png|webp)$/.test(src))
+        const filtered = data.gallery.filter(src => /^images\/[a-zA-Z0-9_.-]+\.(avif|jpg|jpeg|png|webp)$/.test(src));
+        galleryGrid.innerHTML = filtered
           .map(src =>
             `<div class="gallery-item"><img src="/${src}" alt="Hit Factory live" loading="lazy"><div class="gallery-overlay"></div></div>`
           ).join('');
-        layoutGallery(galleryGrid);
+        if (window.innerWidth > 968) layoutGallery(galleryGrid);
         initLightbox();
         galleryGrid.querySelectorAll('.gallery-item').forEach(el => {
           el.classList.add('reveal');
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (e) {
       // Fallback: layout static gallery items
-      if (galleryGrid) layoutGallery(galleryGrid);
+      if (galleryGrid && window.innerWidth > 968) layoutGallery(galleryGrid);
     }
   }
 
