@@ -231,36 +231,44 @@ letter-spacing: clamp(4px, 1.5vw, 12px); /* Adapts with screen */
 padding: 0 clamp(16px, 4vw, 24px);       /* Container padding */
 ```
 
-### Fluid sizing: always use clamp(), never fixed px
+### Fluid sizing: rem everywhere, fluid html font-size
 
-**Rule:** All font sizes, spacings, paddings that vary by screen — use `clamp(min, preferred, max)` from the start. Never hardcode `px` values that need media query overrides later.
+**Rule:** Use `rem` for all sizes from the start. Make `html` font-size fluid, then everything scales automatically. Fix edge cases with targeted breakpoints.
 
 ```css
-/* Good — fluid, no breakpoints needed */
-font-size: clamp(52px, 18vw, 180px);
-letter-spacing: clamp(2px, 1vw, 12px);
-padding: 0 clamp(16px, 4vw, 24px);
+/* Step 1 — Fluid root font-size */
+html {
+  font-size: 16px;
+}
+@media (max-width: 1200px) { html { font-size: 14px; } }
+@media (max-width: 768px)  { html { font-size: 13px; } }
+@media (max-width: 480px)  { html { font-size: 12px; } }
 
-/* Bad — requires multiple @media to fix */
-font-size: 180px;
-@media (max-width: 768px) { font-size: 80px; }
-@media (max-width: 480px) { font-size: 48px; }
+/* Step 2 — Everything in rem */
+.hero-title    { font-size: 11rem; }
+.section-title { font-size: 4.5rem; }
+.hero-subtitle { font-size: 1.375rem; letter-spacing: 0.5rem; }
+.container     { padding: 0 1.5rem; }
+.nav-logo      { font-size: 1.75rem; }
+
+/* Step 3 — Fix edge cases only where needed */
+@media (max-width: 480px) {
+  .hero-title { font-size: 8rem; }
+  .nav-logo   { font-size: 1.2rem; }
+}
 ```
 
-**Why:** Fixed `px` values create discrete jumps between breakpoints. `clamp()` scales smoothly across all screen sizes. Easier to maintain — one line instead of multiple media queries. Especially important for multilingual sites where text length varies by language.
+**Why this is better than clamp() everywhere:**
+- One place to control scaling (html font-size)
+- All elements scale proportionally — no per-element tuning
+- Easier to fix: change one breakpoint, everything adjusts
+- `rem` values are readable and predictable
+- Edge case fixes are targeted, not systemic
 
-**Units priority:**
-- `clamp()` with `vw` for fluid scaling (headings, hero text, spacing)
-- `rem` for consistent sizing relative to root font-size (body text, margins, paddings)
-- `px` only for borders, shadows, and tiny fixed values (1px, 2px)
-- Never `px` for font sizes or layout spacing — always `rem` or `clamp()`
-
-**Where to apply:**
-- Hero title, subtitles, section headings
-- Letter-spacing (long text with wide spacing overflows on mobile)
-- Container padding (tighter on mobile, wider on desktop)
-- Nav logo size
-- Any spacing that "breaks" on small screens
+**Units:**
+- `rem` — for everything: fonts, margins, paddings, letter-spacing, gaps
+- `px` — only for borders, shadows, outlines (1-2px)
+- `vw` — only if truly needed for viewport-relative (rare)
 
 ### Multilingual text overflow prevention
 
