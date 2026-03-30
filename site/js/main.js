@@ -178,6 +178,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      // Update contact links from admin data
+      if (data.contact) {
+        const c = data.contact;
+        document.querySelectorAll('a[href^="tel:"]').forEach((el, i) => {
+          if (i === 0 && c.phoneLink) el.href = c.phoneLink;
+          if (i === 0 && c.phone) el.querySelector('.contact-value')?.replaceChildren(document.createTextNode(c.phone));
+        });
+        document.querySelectorAll('a[href^="mailto:"]').forEach(el => {
+          if (c.email) { el.href = 'mailto:' + c.email; const v = el.querySelector('.contact-value'); if (v) v.textContent = c.email; }
+        });
+        document.querySelectorAll('a[href*="instagram.com"]').forEach(el => {
+          if (c.instagramUrl) el.href = c.instagramUrl;
+          const v = el.querySelector('.contact-value');
+          if (v && c.instagram) v.textContent = c.instagram;
+        });
+      }
+
       // Inject custom head/footer code
       if (data.customHeadCode) {
         const headEl = document.getElementById('custom-head-code');
