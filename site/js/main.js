@@ -157,17 +157,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (t) {
           document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if (t[key]) el.textContent = t[key];
+            if (t[key] && t[key].trim()) el.textContent = t[key];
           });
           // Update page title and OG meta tags
-          if (t['page.title']) {
+          if (t['page.title'] && t['page.title'].trim()) {
             document.title = t['page.title'];
             const ogTitle = document.querySelector('meta[property="og:title"]');
             if (ogTitle) ogTitle.setAttribute('content', t['page.title']);
             const twTitle = document.querySelector('meta[name="twitter:title"]');
             if (twTitle) twTitle.setAttribute('content', t['page.title']);
           }
-          if (t['hero.description']) {
+          if (t['hero.description'] && t['hero.description'].trim()) {
             const metaDesc = document.querySelector('meta[name="description"]');
             if (metaDesc) metaDesc.setAttribute('content', t['hero.description']);
             const ogDesc = document.querySelector('meta[property="og:description"]');
@@ -184,17 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('a[href^="tel:"]').forEach((el, i) => {
           const link = i === 0 ? c.phoneLink : c.phoneLink2;
           const display = i === 0 ? c.phone : c.phone2;
-          if (link) el.href = link;
+          if (link && link.trim()) el.href = link;
           const v = el.querySelector('.contact-value');
-          if (v && display) v.textContent = display;
+          if (v && display && display.trim()) v.textContent = display;
         });
         document.querySelectorAll('a[href^="mailto:"]').forEach(el => {
-          if (c.email) { el.href = 'mailto:' + c.email; const v = el.querySelector('.contact-value'); if (v) v.textContent = c.email; }
+          if (c.email && c.email.trim()) { el.href = 'mailto:' + c.email; const v = el.querySelector('.contact-value'); if (v) v.textContent = c.email; }
         });
         document.querySelectorAll('a[href*="instagram.com"]').forEach(el => {
-          if (c.instagramUrl) el.href = c.instagramUrl;
+          if (c.instagramUrl && c.instagramUrl.trim()) el.href = c.instagramUrl;
           const v = el.querySelector('.contact-value');
-          if (v && c.instagram) v.textContent = c.instagram;
+          if (v && c.instagram && c.instagram.trim()) v.textContent = c.instagram;
         });
       }
 

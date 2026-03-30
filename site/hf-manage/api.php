@@ -132,25 +132,19 @@ function loadSiteData() {
 }
 
 function getDefaultData() {
+    // No hardcoded defaults — all values come from admin panel
     return [
         'seo' => [
-            'title' => 'Hit Factory — Premium Cover Band',
-            'description' => 'Premium cover band for events',
-            'keywords' => 'cover band, live music, Hit Factory',
-            'canonical' => BASE_URL . '/',
-            'ogImage' => BASE_URL . '/images/og-image.jpg'
+            'title' => '', 'description' => '', 'keywords' => '',
+            'canonical' => '', 'ogImage' => ''
         ],
         'contact' => [
-            'phone' => '+995 591 224 281',
-            'phoneLink' => 'tel:+995591224281',
-            'phone2' => '+995 555 25 83 69',
-            'phoneLink2' => 'tel:+995555258369',
-            'email' => 'hitfactorymusicband@gmail.com',
-            'instagram' => '@hitfactory_band',
-            'instagramUrl' => 'https://www.instagram.com/hitfactory_band'
+            'phone' => '', 'phoneLink' => '',
+            'phone2' => '', 'phoneLink2' => '',
+            'email' => '', 'instagram' => '', 'instagramUrl' => ''
         ],
-        'video' => ['youtubeId' => 'BGo9yW8Uocs', 'posterImage' => 'images/band-full-pink.avif'],
-        'stats' => ['musicians' => '5', 'songs' => '200+', 'events' => '100+', 'years' => '5+'],
+        'video' => ['youtubeId' => '', 'posterImage' => ''],
+        'stats' => ['musicians' => '', 'songs' => '', 'events' => '', 'years' => ''],
         'gallery' => [
             'images/band-full-teal.avif', 'images/duo-guitar-vocal.avif',
             'images/vocalist-singing.avif', 'images/guitarist-solo.avif',

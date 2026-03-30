@@ -270,6 +270,33 @@ html {
 - `px` — only for borders, shadows, outlines (1-2px)
 - `vw` — only if truly needed for viewport-relative (rare)
 
+### No default values in admin fields
+
+**Rule:** Admin fields have no hardcoded defaults. If a field is empty in admin, it's empty on the frontend. Static HTML serves as the baseline — JS only overrides with non-empty values from content.json.
+
+```php
+// PHP: getDefaultData() returns empty strings, not placeholder values
+'contact' => ['phone' => '', 'email' => '', 'instagram' => '', ...]
+```
+
+```javascript
+// JS: only override if value is non-empty
+if (t[key] && t[key].trim()) el.textContent = t[key];
+if (c.email && c.email.trim()) el.href = 'mailto:' + c.email;
+```
+
+**Why:**
+- Prevents stale defaults from overwriting admin-edited values
+- No "phantom" data appearing when admin hasn't set a value
+- Deleting `site-data.json` doesn't reset to hardcoded values
+- Like WordPress ACF: fields are empty unless explicitly filled
+- Static HTML contains the build-time content as fallback
+
+**Never do:**
+- Hardcode real data (phone numbers, emails, URLs) in PHP defaults
+- Delete `site-data.json` to "fix" data — it destroys admin edits
+- Overwrite DOM elements with empty strings from content.json
+
 ### Multilingual text overflow prevention
 
 ```css
