@@ -377,10 +377,17 @@
           <button class="tab" data-tab="code">Code Injection</button>
         </div>
         <div class="tab-panel active" id="tabpanel-contact">
+          <h3 style="margin-top:0">Phone 1</h3>
           <div class="field-row">
-            <div class="field"><label>Phone (display)</label><input type="text" id="contact-phone" value="${escAttr(c.phone||'')}"></div>
-            <div class="field"><label>Phone (tel: link)</label><input type="text" id="contact-phoneLink" value="${escAttr(c.phoneLink||'')}"></div>
+            <div class="field"><label>Display</label><input type="text" id="contact-phone" value="${escAttr(c.phone||'')}"></div>
+            <div class="field"><label>tel: link</label><input type="text" id="contact-phoneLink" value="${escAttr(c.phoneLink||'')}"></div>
           </div>
+          <h3>Phone 2</h3>
+          <div class="field-row">
+            <div class="field"><label>Display</label><input type="text" id="contact-phone2" value="${escAttr(c.phone2||'')}"></div>
+            <div class="field"><label>tel: link</label><input type="text" id="contact-phoneLink2" value="${escAttr(c.phoneLink2||'')}"></div>
+          </div>
+          <h3>Other</h3>
           <div class="field"><label>Email</label><input type="email" id="contact-email" value="${escAttr(c.email||'')}"></div>
           <div class="field-row">
             <div class="field"><label>Instagram Handle</label><input type="text" id="contact-instagram" value="${escAttr(c.instagram||'')}"></div>
@@ -492,7 +499,7 @@
         if (el) { if (!siteData.seo) siteData.seo = {}; siteData.seo[k] = el.value; }
       });
       // Contact
-      ['phone','phoneLink','email','instagram','instagramUrl'].forEach(k => {
+      ['phone','phoneLink','phone2','phoneLink2','email','instagram','instagramUrl'].forEach(k => {
         const el = document.getElementById('contact-' + k);
         if (el) { if (!siteData.contact) siteData.contact = {}; siteData.contact[k] = el.value; }
       });

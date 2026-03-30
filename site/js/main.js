@@ -182,8 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.contact) {
         const c = data.contact;
         document.querySelectorAll('a[href^="tel:"]').forEach((el, i) => {
-          if (i === 0 && c.phoneLink) el.href = c.phoneLink;
-          if (i === 0 && c.phone) el.querySelector('.contact-value')?.replaceChildren(document.createTextNode(c.phone));
+          const link = i === 0 ? c.phoneLink : c.phoneLink2;
+          const display = i === 0 ? c.phone : c.phone2;
+          if (link) el.href = link;
+          const v = el.querySelector('.contact-value');
+          if (v && display) v.textContent = display;
         });
         document.querySelectorAll('a[href^="mailto:"]').forEach(el => {
           if (c.email) { el.href = 'mailto:' + c.email; const v = el.querySelector('.contact-value'); if (v) v.textContent = c.email; }

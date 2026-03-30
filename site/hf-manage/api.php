@@ -141,11 +141,13 @@ function getDefaultData() {
             'ogImage' => BASE_URL . '/images/og-image.jpg'
         ],
         'contact' => [
-            'phone' => '+1 (234) 567-890',
-            'phoneLink' => 'tel:+1234567890',
-            'email' => 'info@hitfactory.band',
-            'instagram' => '@hitfactory',
-            'instagramUrl' => 'https://instagram.com/hitfactory'
+            'phone' => '+995 591 224 281',
+            'phoneLink' => 'tel:+995591224281',
+            'phone2' => '+995 555 25 83 69',
+            'phoneLink2' => 'tel:+995555258369',
+            'email' => 'hitfactorymusicband@gmail.com',
+            'instagram' => '@hitfactory_band',
+            'instagramUrl' => 'https://www.instagram.com/hitfactory_band'
         ],
         'video' => ['youtubeId' => 'BGo9yW8Uocs', 'posterImage' => 'images/band-full-pink.avif'],
         'stats' => ['musicians' => '5', 'songs' => '200+', 'events' => '100+', 'years' => '5+'],
